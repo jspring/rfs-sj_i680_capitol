@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [[ q$2 == 'q' ]]
+then
+	echo
+		echo "Usage: $0 <Controller IP> <Database variable number (must be a multiple of 4)> <Port> <Timestamp(for naming files, in YYMMDD_HHMMSS format)> (Loop/Polling interval, default 5000 ms)"
+	echo "       where <> denotes necessary arguments and () denotes optional arguments"
+	echo
+	exit 1
+fi
+
+CONTROLLER_IP=$1
+URMS_STATUS_DBNUM=$2
+PORT=$3
+TIMESTAMP=$4
+INTERVAL=$5
+CONTROL=$6
+
+if [[ q$INTERVAL == 'q' ]]
+then
+        INTERVAL=30000
+fi
+
+if [[ $CONTROL == "control" ]]
+then
+	echo "Starting urms with control"
+	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i $INTERVAL -d $URMS_STATUS_DBNUM -p $PORT >>/big/data/sj_ac_rm/urmsgo_$TIMESTAMP.err &
+else
+	echo "Starting urms with no control, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $INTERVAL"
+	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i $INTERVAL -n -d $URMS_STATUS_DBNUM -p $PORT >/big/data/sj_ac_rm/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+fi
+#sleep 5
+	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP"
+#Changed file time to 3 minutes	/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /big/data/sj_ac_rm -i $INTERVAL -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/sj_ac_rm/"wrfiles_sj_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+	/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /big/data/sj_ac_rm -i $INTERVAL -m 3 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/sj_ac_rm/"wrfiles_sj_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &

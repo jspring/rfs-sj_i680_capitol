@@ -1,0 +1,18 @@
+#!/bin/bash
+
+sudo /home/sr99_ramp_metering/system/stopreplay
+
+/home/path/db/lnx/db_slv &
+sleep 1
+/home/sr99_ramp_metering/src/lnx/clt_vars &
+sleep 1
+
+cd /home/sr99_ramp_metering/test/data/03242016/col_91/Added_num_main-num_metered-num_addl-num_opp
+
+y=3000
+for x in `echo a_10.254.27.81_0324034.dat a_10.29.248.118_0324012.dat a_10.29.248.124_0324011.dat a_10.29.248.42_0324035.dat a_10.254.27.82_0324034.dat a_10.254.28.211_0324034.dat a_10.29.248.155_0324067.dat a_10.29.248.185_0324033.dat a_10.29.249.46_0324035.dat a_10.254.24.157_0324033.dat a_10.254.25.120_0324035.dat a_10.254.27.67_0324034.dat a_10.254.28.212_0324034.dat a_10.29.248.155_0324066.dat a_10.29.248.56_0324011.dat a_10.254.24.156_0324033.dat a_10.254.25.113_0324045.dat a_10.254.28.213_0324034.dat a_10.29.248.128_0324034.dat a_10.29.248.157_0324011.dat a_10.29.248.108_0324038.dat a_10.29.248.20_0324034.dat a_10.29.248.52_0324013.dat a_10.29.248.76_0324034.dat`
+do 
+	/home/sr99_ramp_metering/system/replay_controller_go $y $x 1000
+	y=$(($y+200))
+	echo $x $y
+done

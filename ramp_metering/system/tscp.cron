@@ -1,0 +1,8 @@
+#!/bin/bash
+
+ps -elf |grep -v grep | grep 'receive_urms_data'
+
+if [[ $? -ne 0 ]]
+then
+	/home/sr99_ramp_metering/system/artgo
+fi

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+echo "Killing wrfiles_ac_rm"
+killall wrfiles_ac_rm
+sleep 1
+
+echo "Killing ac_rm_algo"
+killall ac_rm_algo
+sleep 1
+
+echo "Killing receive_urms_data_go.sh"
+pid=`ps -elf | grep -v grep | grep '/bin/bash /home/sr99_ramp_metering/system/receive_urms_data_go.sh' | awk '{print $4}'`
+kill $pid
+sleep 1
+
+echo "Killing receive_urms_data"
+pid=`ps -elf | grep -v grep | grep '/home/atsc/ab3418/lnx/receive_urms_data' | awk '{print $4}'`
+kill $pid
+sleep 1
+
+echo "Killing clt_vars"
+killall clt_vars
+sleep 1
+
+echo "Killing ab3418comm"
+killall ab3418comm
+sleep 1
+
+echo "Killing db_slv"
+killall db_slv

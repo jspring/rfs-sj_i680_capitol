@@ -1,0 +1,38 @@
+#!/bin/bash
+
+echo "Executing stopart"
+/home/sr99_ramp_metering/system/stopart
+sleep 2
+
+echo "Starting db_slv"
+/home/path/db/lnx/db_slv &
+sleep 1
+
+echo "Starting clt_vars"
+/home/sr99_ramp_metering/src/lnx/clt_vars &
+sleep 1
+
+echo "Starting ab3418comm"
+if [[ $1 == "home" ]]
+then
+#	/home/atsc/ab3418/lnx/ab3418comm -u -p /dev/ttyUSB0 >>/big/data/ac_rm_1/ab3418comm.out 2>>/big/data/ac_rm_1/ab3418comm.err &
+	/home/atsc/ab3418/lnx/ab3418comm -u -p /dev/ttyUSB0 &
+else
+	/home/atsc/ab3418/lnx/ab3418comm -u >>/big/data/ac_rm_1/ab3418comm.out 2 >>/big/data/ac_rm_1/ab3418comm.err &
+#	Start up no control
+#	/home/atsc/ab3418/lnx/ab3418comm -n -u >>/big/data/ac_rm_1/ab3418comm.out 2 >>/big/data/ac_rm_1/ab3418comm.err &
+fi
+sleep 5
+
+echo "Starting receive_urms_data_go.sh"
+/home/sr99_ramp_metering/system/receive_urms_data_go.sh &
+sleep 1
+
+#echo "Starting ac_rm_algo"
+cd /home/sr99_ramp_metering/src 
+./lnx/ac_rm_algo >>/big/data/ac_rm_1/ac_rm_algo.err &
+#./lnx/ac_rm_algo &
+sleep 1
+
+echo "Starting wrfiles_ac_rm"
+/home/sr99_ramp_metering/src/lnx/wrfiles_ac_rm -d /big/data/ac_rm_1 -m 15 &

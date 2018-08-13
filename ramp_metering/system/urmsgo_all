@@ -1,0 +1,35 @@
+#!/bin/bash
+
+echo "Executing stopurms"
+/home/sj_i680_capitol/ramp_metering/system/stopurms
+sleep 1
+
+echo "Starting db_slv"
+/home/path/db/lnx/db_slv &
+sleep 1
+
+echo "Starting clt_vars"
+/home/sj_i680_capitol/ramp_metering/src/lnx/clt_vars &
+sleep 1
+
+TIMESTAMP=`date +%y%m%d_%H%M%S`
+INTERVAL=$1
+
+echo "Starting urmsgo with interval $INTERVAL"
+
+/home/sj_i680_capitol/ramp_metering/system/urmsgo 166.253.101.111	3000	5000	$TIMESTAMP $INTERVAL control
+#sleep 1
+/home/sj_i680_capitol/ramp_metering/system/urmsgo 166.255.77.236	3200	5000	$TIMESTAMP $INTERVAL control
+#sleep 1
+/home/sj_i680_capitol/ramp_metering/system/urmsgo 166.253.101.112	3400	5000	$TIMESTAMP $INTERVAL control
+#sleep 1
+/home/sj_i680_capitol/ramp_metering/system/urmsgo 166.255.77.235	3600	5000	$TIMESTAMP $INTERVAL control
+#sleep 1
+/home/sj_i680_capitol/ramp_metering/system/urmsgo 166.253.101.113	3800	5000	$TIMESTAMP $INTERVAL
+#sleep 1
+
+cd /home/sj_i680_capitol/ramp_metering/src
+mkdir Out_Data_$TIMESTAMP
+rm Out_Data
+ln -s Out_Data_$TIMESTAMP Out_Data
+./lnx/opt_crm -i $INTERVAL >/big/data/sj_ac_rm/opt_crm_$TIMESTAMP.txt &

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [[ q$2 == 'q' ]]
+then
+	echo
+		echo "Usage: $0 <Database number (Modulo 4!)> <filename> (loop interval, ms default 5000)"
+	echo "       where <> denotes necessary arguments and () denotes optional arguments"
+	echo
+	exit 1
+fi
+
+DBNUM=$1
+FILENAME=$2
+INTERVAL=$3
+
+if [[ q$INTERVAL == 'q' ]]
+then
+	INTERVAL=5000
+fi
+
+EXT=`echo $FILENAME | sed '{s/\// /g}' | awk '{print $NF}' | cut -c 2- | sed '{s/dat/err/g}'`
+
+echo "Starting replay_controller, $DBNUM $FILENAME $INTERVAL"
+#Usage: ../src/lnx/replay_general -d <Database number (Modulo 4!)> -f <filename> -i (loop interval) -v (verbose)
+
+/home/sr99_ramp_metering/src/lnx/replay_general -d $DBNUM -f $FILENAME -i $INTERVAL -v 1>>/big/data/ac_rm_1/replay_general$EXT 2>&1 &

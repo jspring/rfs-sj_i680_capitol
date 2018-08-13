@@ -1,0 +1,52 @@
+#!/bin/bash
+
+if [[ z`ps -ef | grep db_slv | grep -v grep` == 'z' ]]
+then
+	/home/sr99_ramp_metering/system/urmsgo_all
+	exit 1
+fi
+
+TIMESTAMP=`date +%m%Y%d_%H%M%S`
+
+for x in `cat /home/sr99_ramp_metering/system/urmsgo_all | grep urmsgo | awk '{print $2}'`
+do 
+	CONTROLLER_IP=$x
+	URMS_STATUS_DBNUM=`cat /home/sr99_ramp_metering/system/urmsgo_all | grep $x | awk '{print $3}'`
+	PORT=`cat /home/sr99_ramp_metering/system/urmsgo_all | grep $x | awk '{print $4}'`
+	NUM_CONTROLLERS=1
+
+	URMS_STATUS_DBNUM2=`echo $URMS_STATUS_DBNUM | awk '{print $2}'`
+
+	if [[ q$URMS_STATUS_DBNUM2 != 'q' ]]
+	then
+		PORT2=`echo $PORT | awk '{print $2}'`
+		PORT=`echo $PORT | awk '{print $1}'`
+		URMS_STATUS_DBNUM=`echo $URMS_STATUS_DBNUM | awk '{print $1}'`
+		NUM_CONTROLLERS=2
+	fi
+
+#	for((INDEX=$NUM_CONTROLLERS ; $INDEX>0 ; INDEX=$(($INDEX-1)) ))
+	for((INDEX=$NUM_CONTROLLERS ; $INDEX>0 ; INDEX-- ))
+	do
+
+		#Check good data in log file, and kill urms if it's all the same (except for the timestamp)
+		for FILE in `ls -tr /big/data/ac_rm_1/*.dat |tail -28 | grep $CONTROLLER_IP | grep $PORT`
+		do
+			NOW=`date +%s`
+			OPEN=`stat $FILE -c %X`
+			DIFF=$(($NOW - $OPEN))
+			if [[ $DIFF -gt 90 ]] #In 90 seconds, there should be 3 raw data calculations, as well as numerous updates of the "seconds" column
+			then
+				NUMDIFF=`cat $FILE | cut -d ' ' -f 2- | uniq -c| wc | awk '{print $1}'`
+				if [[ $NUMDIFF -lt 3 ]]
+				then 
+					echo $CONTROLLER_IP $PORT no good
+					netstat -an | grep $CONTROLLER_IP:$PORT
+				fi
+			fi
+		done
+
+		PORT=$PORT2
+		URMS_STATUS_DBNUM=$URMS_STATUS_DBNUM2
+	done
+done

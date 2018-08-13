@@ -1,0 +1,32 @@
+#!/bin/bash
+# Script for checking the latest data file's timestamp against the last
+# timestamp written to the file, and the sequence number in the GetLongStatus8
+# message.  If either check fails, restart the database clients.
+
+filename=`/home/sr99_ramp_metering/nagios/scripts/check_latest_ts_latest_file_too_old.sh`
+if [[ $? == 0 ]]
+then
+	/home/sr99_ramp_metering/nagios/scripts/check_bad_seq_no.sh $filename
+	if [[ $? == 0 ]]
+	then	
+		echo `date` Good data >>/big/data/ac_rm_1/ab3418comm.err
+	else
+		echo `date` Bad data. Restarting... >>/big/data/ac_rm_1/ab3418comm.err
+		/home/sr99_ramp_metering/system/artgo
+		exit 1
+	fi
+	/home/sr99_ramp_metering/nagios/scripts/check_bad_urms_seq_no.sh $filename
+	if [[ $? == 0 ]]
+	then	
+		echo `date` Good URMS data >>/big/data/ac_rm_1/ab3418comm.err
+		exit 0
+	else
+		echo `date` Bad URMS data. Restarting... >>/big/data/ac_rm_1/ab3418comm.err
+		/home/sr99_ramp_metering/system/artgo
+		exit 1
+	fi
+else
+	echo `date` $filename too old. Restarting...>>/big/data/ac_rm_1/ab3418comm.err
+	/home/sr99_ramp_metering/system/artgo
+	exit 2
+fi

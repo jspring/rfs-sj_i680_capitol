@@ -1,0 +1,30 @@
+IMEI                 ICCID	            Tel #            IP addr           Caltrans IP TCP addr    Intersection
+                                                                                           addr (7-4)
+990 0005 6210 5462   89148000004199180178   (916) 698-5159   166.253.101.111   172.25.3.83 3              Alum Rock Ave. (loop)
+990 0005 6206 6458   89148000004199192397   (916) 698-7091   166.255.77.236    172.25.3.67 4              Alum Rock Ave. (diagonal)
+990 0005 6210 5413   89148000004199179980   (916) 698-6126   166.253.101.112   172.25.3.59 4              McKee Rd.
+990 0005 6206 6615   89148000004199180673   (916) 698-6230   166.255.77.235    172.25.3.60 9              Berryessa Rd. 
+990 0005 6206 6409   89148000004199180749   (916) 698-6230   166.253.101.113   172.25.3.93 10              Capitol Expy data collection
+
+Caltrans also sets the netmask, gateway, and broadcast addresses.  The netmask is 255.255.255.0.  The gateway and broadcast addresses contain the first three octets as the IP address (i.e. 172.25.3 in all of the above cases), and the last octet is 001 for gateway and 255 for broadcast.  This means, for all of the above Caltrans IP addresses:
+
+Gateway: 172.25.3.1
+Broadcast: 172.25.3.255
+
+
+Recipe for configuring Cradlepoints
+1. Push reset button for a long time while powering up.
+2. Go to 192.168.0.1 on Google Chromium
+3. Get default password from label on modem.
+4. Go to Networking>>Local IP Networks>>Primary LAN and click on Edit
+5. Go to IPv4 Settings and change the IP Address to 172.25.3.1.  Make sure the netmask is 255.255.255.0. Hit Save.
+6. Go to Security>>Zone Firewall>>Port Forward
+7. Enter 5000 for the internet port, 1000 for the local port, and Caltrans IP for the local IP address.
+8. Go to System>>Administration>>Remote Admin
+9. Check "Allow WAN pings" and "Allow Remote Web Administration"
+10. Go to Connection Manager and uncheck WiFi as WAN.
+11. Go to Status>>Internet>>Connections
+12. Check Internal LTE/EVDO-VZ (SIM-Verizon)
+13. Click on Summary to get the IP address.
+14. Run /home/atsc/urms/run_urms_test with the IP address as an argument.  You should see the fixed metering
+rates changing on the 2070 under Command Source>>Interconnect (5-3)

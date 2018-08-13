@@ -1,0 +1,97 @@
+#!/bin/bash
+
+if [[ z`ps -ef | grep db_slv | grep -v grep` == 'z' ]]
+then
+	echo "Starting urmsgo_all 30000"
+	/home/sj_i680_capitol/ramp_metering/system/urmsgo_all 30000
+	exit 1
+fi
+
+TIMESTAMP=`date +%m%Y%d_%H%M%S`
+RESTART_LOGFILE=/big/data/ac_rm_1/restart_$TIMESTAMP
+
+for x in `cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep urmsgo | grep system | awk '{print $2}'`
+do 
+	CONTROLLER_IP=$x
+	URMS_STATUS_DBNUM=`cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $x | awk '{print $3}'`
+	PORT=`cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $x | awk '{print $4}'`
+	NUM_CONTROLLERS=1
+
+	URMS_STATUS_DBNUM2=`echo $URMS_STATUS_DBNUM | awk '{print $2}'`
+echo PORT1 $PORT  URMS_STATUS_DBNUM2  $URMS_STATUS_DBNUM2 >>$RESTART_LOGFILE
+
+	if [[ q$URMS_STATUS_DBNUM2 != 'q' ]]
+	then
+		PORT2=`echo $PORT | awk '{print $2}'`
+		PORT=`echo $PORT | awk '{print $1}'`
+		URMS_STATUS_DBNUM=`echo $URMS_STATUS_DBNUM | awk '{print $1}'`
+		NUM_CONTROLLERS=2
+	fi
+
+	for((INDEX=$NUM_CONTROLLERS ; $INDEX>0 ; INDEX=$(($INDEX-1)) ))
+#	for((INDEX=$NUM_CONTROLLERS ; $INDEX>0 ; INDEX-- ))
+	do
+echo PORT11 $PORT INDEX $INDEX >>$RESTART_LOGFILE
+		#Check wrfiles running first
+		if [[ m`ps -ef | grep wrfiles_rm | grep $x | grep -v grep` == 'm' ]]
+		then 
+       		 	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP" >>$RESTART_LOGFILE
+			/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 30000 -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+			sleep 5
+		fi
+
+echo PORT2 $PORT
+		#Check good data in log file, and kill urms if it's all the same (except for the timestamp)
+		for FILE in `ls -tr /big/data/ac_rm_1/*.dat |tail -28 | grep $CONTROLLER_IP | grep $PORT`
+		do
+			NOW=`date +%s`
+			OPEN=`stat $FILE -c %X`
+echo NOW $NOW OPEN $OPEN FILE $FILE
+			DIFF=$(($NOW - $OPEN))
+			if [[ $DIFF -gt 90 ]] #In 90 seconds, there should be 3 raw data calculations, as well as numerous updates of the "seconds" column
+			then
+				NUMDIFF=`cat $FILE | cut -d ' ' -f 2- | uniq -c| wc | awk '{print $1}'`
+				if [[ $NUMDIFF -lt 3 ]]
+				then 
+					PID=`ps -elf | grep  urms | grep $CONTROLLER_IP | grep $PORT | awk '{print $4}'`
+					if [[ q$PID != 'q' ]]
+					then
+						echo $CONTROLLER_IP $PORT no good >>$RESTART_LOGFILE
+						{ echo "super user" ; sleep 2; echo "break"; sleep 1; } | telnet $CONTROLLER_IP 231
+						sudo kill $PID
+					fi
+				fi
+			fi
+		done
+
+		#Now that urms is dead, check whether the TCP connection has timed out (this will take a couple of minutes, so
+		#this check will succeed the next time the script is run).
+echo PORT3 $PORT
+		netstat -an | grep $CONTROLLER_IP | grep $PORT
+		if [[ $? -ne 0 ]] 
+#		if [[ q`ps -ef | grep urms | grep $x | grep -v grep` == 'q' ]]
+		then 
+			echo $x urms process not running. Attempting restart.... >>$RESTART_LOGFILE
+
+			cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $CONTROLLER_IP | grep control
+			if [[ $? == 0 ]]
+			then			
+				/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+				CONTROL=under_control
+			else
+				/home/atsc/urms/lnx/urms -n -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+				CONTROL=no_control
+			fi
+			echo CONTROLLER_IP $CONTROLLER_IP URMS_STATUS_DBNUM $URMS_STATUS_DBNUM PORT $PORT $CONTROL >>$RESTART_LOGFILE
+			sleep 5
+		fi
+		PORT=$PORT2
+		URMS_STATUS_DBNUM=$URMS_STATUS_DBNUM2
+	done
+done
+
+if [[ z`ps -ef | grep opt_crm | grep -v grep` == 'z' ]]
+then
+	cd /home/sj_i680_capitol/ramp_metering/src
+	./lnx/opt_crm -i $INTERVAL >/dev/null &
+fi

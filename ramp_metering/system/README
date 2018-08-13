@@ -1,0 +1,5 @@
+The udev rules file 10-usbdevs.rules creates sym links to the ports on the 
+EasySync ES-U-1008 and calls set_EasySync.sh to set the baud rate on the ports.
+
+Just copy 10-usbdevs.rules to /etc/udev/rules and plug in the EasySync USB
+cable.  You don't need to restart udev.

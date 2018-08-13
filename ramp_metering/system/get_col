@@ -1,0 +1,5 @@
+#!/bin/bash
+
+COL=$1
+FILE=$2
+cat -n $FILE | awk -v var="$COL" '{print $1,$var}' |uniq -f 1 -c

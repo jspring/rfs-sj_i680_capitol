@@ -1,0 +1,19 @@
+#!/bin/bash
+
+echo "Stopping opt_crm"
+killall opt_crm
+sleep 1
+
+echo "Stopping replay_general"
+killall replay_general
+sleep 1
+
+echo "Stopping clt_vars"
+killall clt_vars
+sleep 1
+
+echo "Stopping db_slv"
+killall db_slv
+sleep 1
+
+/home/path/db/db_clean.sh

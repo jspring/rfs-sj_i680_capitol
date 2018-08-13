@@ -1,0 +1,66 @@
+#ACTION=="add", KERNEL=="advdaq*", ATTRS{product}=="USB4761 DA&C Device(FS)", NAME="Advantech USB4761", RUN+="/home/jspring/downloads/advdaq-1.06.0001/startup.sh"
+# This is a description of how I created this udev rules file, so I can do
+# it again in the future!
+#
+# 1. Find out which device is automatically added when you plug in the device 
+#	in /dev, e.g. /dev/ttyUSB0
+#
+# 2. udevinfo -a -p $(udevinfo -q path -n /dev/ttyUSB0) >keyspan.udevinfo
+#	or
+#    udevadm info --attribute-walk -n /dev/ttyUSB0 >keyspan.udevadm.info
+#
+# 3. Look into keyspan.udevinfo and pick out two blocks (a parent and a child)
+# 	that have some characteristic information, e.g. under
+# 
+# 	"looking at device '/class/tty/ttyUSB0':"
+# 	KERNEL=="ttyUSB0"
+# 	.
+# 	.
+# 	.
+# 
+# 	and
+# 
+# 	"looking at parent device '/devices/pci0000:00/0000:00:1d.1/usb5/5-1':"
+# 	.
+# 	.
+# 	.
+# 	SUBSYSTEMS=="usb"
+# 	ATTRS{product}=="Keyspan USA-19H"
+# 
+# 4. Use this information to create a file, e.g. 10-usbdevs.rules.  For KERNEL=="ttyUSB0",
+# 	substitute KERNEL=="ttyUSB?" because the ttyUSB? assignment depends on which
+# 	USB device connected first.
+#
+# 5. Give your dev a name:
+# 	NAME="Keyspan19H"
+#
+# 	so you end up with:
+# 	KERNEL=="ttyUSB?",SUBSYSTEMS=="usb",ATTRS{product}=="Keyspan USA-19H",NAME="Keyspan19H"
+#
+# 6. It turned out that the GPS USB device, Prolific's BU-353, also had to be in
+#	the uucp group for Slackware to understand that it's a serial device.
+#	I tried catting /dev/gps_prolific, and got the error message:
+#
+#	bash: /dev/gps_prolific: Permission denied
+#
+#	So you may also need to add a group assignment, GROUP="uucp"
+# 
+# 7. Copy 10-usbdevs.rules to /etc/udev/rules.
+#
+# 8. Restart udev with
+# 	sudo /etc/init.d/udev restart
+# 	or
+#	sudo udevcontrol reload_rules (Slackware)
+#	or
+#	sudo service udev restart
+#
+# 9. Test it. 
+
+#KERNEL=="ttyUSB?",SUBSYSTEMS=="usb",ATTRS{product}=="Keyspan USA-19H",NAME="Keyspan19H",RUN+="/bin/stty -F /dev/Keyspan19H raw 19200"
+#KERNEL=="ttyUSB?",SUBSYSTEMS=="usb-serial",DRIVERS=="pl2303",NAME="Keyspan",RUN+="/bin/stty -F /dev/Keyspan raw 9600"
+#SUBSYSTEM=="usb",ATTR{manufacturer}=="Total Phase, Inc.",ATTRS{product}=="Komodo CAN Duo Interface",SYMLINK+="Komodo_Duo",GROUP="plugdev"
+#KERNEL=="sd*",SUBSYSTEMS=="usb",ATTRS{manufacturer}=="LaCie",ATTRS{product}=="LaCie Rugged FW/USB",SYMLINK+="LaCie_USB_drive",GROUP="plugdev"
+# The following rule creates symbolic links "EasySync[0-7]" to the system-named "ttyUSB[0-7]"
+#KERNEL=="ttyUSB?",SUBSYSTEMS=="usb-serial",DRIVERS=="ftdi_sio",SYMLINK+="EasySync%n",RUN+="/home/atsc/ab3418/system/set_EasySync.sh"
+#KERNEL=="ttyUSB?",SUBSYSTEMS=="usb",DRIVERS=="ftdi_sio",ATTRS{bInterfaceNumber}=="00",SYMLINK+="EasySync0"
+KERNEL=="ttyUSB?",SUBSYSTEMS=="usb",DRIVERS=="ftdi_sio",RUN+="/bin/stty -F /dev/ttyUSB%n raw 38400"
