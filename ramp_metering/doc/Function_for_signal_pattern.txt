@@ -1,0 +1,27 @@
+bool override_on=false; //This is to indicate whether queue override override is needed
+double ramp_occ; //Variable for on-ramp queue detector occupancy
+
+	ramp_occ=AKIDetGetOccupancyAggregatedbyId(ramp_detectorID,0); //This is the Aimsun simulation command for obtaining the current on-ramp queue detector occupancy, 
+																	please update to reflect what it takes to get on-ramp queue detector occupancy from Caltrans.
+	if (override_on=false) //Check if queue override was supposed to be active in the previous cycle
+	{
+		if (ramp_occ>=40) //Check if the occupancy is greater than or equal to the 40% threshold
+		{
+			patternNew(); //Queue override is needed, but we will use our new signal timing pattern to supplement queue override, DO NOT turn on queue override
+			override_on=true; //Let's indicate that queue override was needed for the this cycle
+		}
+	}
+	else
+	{
+		if (ramp_occ>30) //Queue override was supposed to be active in the previous cycle but let's check if the on-ramp queue detector occupancy has dropped low enough 
+							to not require queue override. Then we can determine if we need to switch back to the original signal timing pattern from San Jose
+		{
+			patternNew(); // Queue override should still be active if we didn't implement our control strategy, or new signal timing pattern. DO NOT turn on queue override
+			override_on=true; //Let's indicate that queue override was needed for the this cycle
+		}
+		else
+		{
+			patternOld(); //On-ramp queue detector occupancy has dropped to 30% or lower, queue override not required, switch to the original timing plan from San Jose
+			override_on=false; //Let's indicate that queue override was NOT needed for the this cycle
+		}
+	}
