@@ -1,0 +1,45 @@
+#!/bin/bash
+
+TIMESTAMP=`date +%y%m%d_%H%M%S`
+INTERVAL=$1
+
+echo "Starting read_all"
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.9
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.60
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.7
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.6
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.1
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.10
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.11
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.12
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.13
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.14
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.15
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.16
+sleep 1
+
+/home/sj_i680_capitol/arterial/system/read_tsc1_status.sh 10.192.131.10
+sleep 1
