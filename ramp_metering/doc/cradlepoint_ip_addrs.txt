@@ -20,11 +20,13 @@ Recipe for configuring Cradlepoints
 5. Go to IPv4 Settings and change the IP Address to 172.25.3.1.  Make sure the netmask is 255.255.255.0. Hit Save.
 6. Go to Security>>Zone Firewall>>Port Forward
 7. Enter 5000 for the internet port, 1000 for the local port, and Caltrans IP for the local IP address.
-8. Go to System>>Administration>>Remote Admin
-9. Check "Allow WAN pings" and "Allow Remote Web Administration"
-10. Go to Connection Manager and uncheck WiFi as WAN.
-11. Go to Status>>Internet>>Connections
-12. Check Internal LTE/EVDO-VZ (SIM-Verizon)
-13. Click on Summary to get the IP address.
-14. Run /home/atsc/urms/run_urms_test with the IP address as an argument.  You should see the fixed metering
+8. Go to Security>>Zone Firewall>>Remote Access Restriction
+9. Add entries for 128.32.234.150 & 128.32.234.154
+10. Go to System>>Administration>>Remote Admin
+11. Check "Allow WAN pings" and "Allow Remote Web Administration"
+12. Go to Connection Manager and uncheck WiFi as WAN.
+13. Go to Status>>Internet>>Connections
+14. Check Internal LTE/EVDO-VZ (SIM-Verizon)
+15. Click on Summary to get the IP address.
+16. Run /home/atsc/urms/run_urms_test with the IP address as an argument.  You should see the fixed metering
 rates changing on the 2070 under Command Source>>Interconnect (5-3)
