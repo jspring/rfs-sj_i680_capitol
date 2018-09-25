@@ -1,10 +1,10 @@
 IMEI                 ICCID	            Tel #            IP addr           Caltrans IP TCP addr    Intersection
                                                                                            addr (7-4)
+990 0005 6206 6409   89148000004199180749   (916) 698-6230   166.253.101.113   172.25.3.77 10             Capitol Expy data collection
 990 0005 6210 5462   89148000004199180178   (916) 698-5159   166.253.101.111   172.25.3.83 3              Alum Rock Ave. (loop)
 990 0005 6206 6458   89148000004199192397   (916) 698-7091   166.255.77.236    172.25.3.67 4              Alum Rock Ave. (diagonal)
 990 0005 6210 5413   89148000004199179980   (916) 698-6126   166.253.101.112   172.25.3.59 4              McKee Rd.
 990 0005 6206 6615   89148000004199180673   (916) 698-6230   166.255.77.235    172.25.3.60 9              Berryessa Rd. 
-990 0005 6206 6409   89148000004199180749   (916) 698-6230   166.253.101.113   172.25.3.77 10             Capitol Expy data collection
 
 Caltrans also sets the netmask, gateway, and broadcast addresses.  The netmask is 255.255.255.0.  The gateway and broadcast addresses contain the first three octets as the IP address (i.e. 172.25.3 in all of the above cases), and the last octet is 001 for gateway and 255 for broadcast.  This means, for all of the above Caltrans IP addresses:
 
