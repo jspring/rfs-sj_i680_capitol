@@ -70,9 +70,9 @@ int main(int argc, char *argv[])
 	char hostname[MAXHOSTNAMELEN+1];
 	int old_fileday = 99;	/// originally set to bad value to force search
 	int serial_num;		/// set in open_data_log	
-	char id_string[80];
-	char monthday[80];
-	char serialnum[80];
+	char id_string[80] = {0};
+	char monthday[80] = {0};
+	char serialnum[80] = {0};
 	char *controller_str;
 	timestamp_t timestamp;                 // used when reading back in
 
@@ -92,19 +92,12 @@ int main(int argc, char *argv[])
 	int xport = COMM_OS_XPORT;	// set correct for OS in sys_os.h 
 	FILE *first_file = NULL;
 	char *first_file_str;
-	char tripdir[80];
-	char tripstr[80];
-	char ac_rm_pre[200];
+	char tripdir[80] = {0};
+	char tripstr[200] = {0};
+	char ac_rm_pre[200] = {0};
 	int i;
 	int use_stdout = 0;
 	int standalone = 0;
-
-	memset(id_string, 0, sizeof(id_string));
-	memset(monthday, 0, sizeof(monthday));
-	memset(serialnum, 0, sizeof(serialnum));
-	memset(tripdir, 0, 80);
-	memset(tripstr, 0, 80);
-	memset(ac_rm_pre, 0, 200);
 
 /*
 
@@ -167,13 +160,6 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
 	db_vars_ac_rm[3].db_id_num = db_urms_status2_var;
 	db_vars_ac_rm[4].db_id_num = db_urms_status3_var;
 	db_vars_ac_rm[5].db_id_num = db_urms_ramp_var;
-
-	if(use_stdout == 0) {
-		strcpy(tripstr, tripdir+19);
-		printf("tripdir %s\n", tripdir);
-		printf("tripstr as string %s as decimal %d\n", tripstr, atoi(tripstr));
-		printf(" file columns %d\n", num_file_columns);
-	}
 
 	/* Log in to the database (shared global memory).  Default to the
 	 * the current host. Assumes other processes that create variables
