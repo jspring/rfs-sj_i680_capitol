@@ -48,39 +48,16 @@ static void sig_hand(int code)
 
 const char *usage = "-i <loop interval> -r (run in replay mode)";
 
-#define NUM_ONRAMPS	16   // this variable is used by data base
+#define NUM_ONRAMPS	5   // this variable is used by data base
 #define NUM_OFFRAMPS 12  // this variable is used by data base
 #define NUM_CYCLE_BUFFS  5
 //
 const char *controller_strings[] = {
-        "10.29.248.108",             //0, OR1
-        "10.254.25.113",             //1
-        "10.254.25.120",             //2, OR2, FR1
-        "10.29.249.46",              //3, OR3,
-        "10.29.248.42",              //4
-        "10.29.248.20",              //5, OR4, FR2
-        "10.29.248.128",             //6, OR5
-        "10.254.27.67",              //7,
-        "10.254.27.82",              //8, OR6, FR3
-        "10.254.27.81",              //9, OR7
-        "10.29.248.76",             //10     , FR4
-        "10.254.28.213",            //11, OR8
-        "10.254.28.212",            //12, OR9
-        "10.254.28.211",            //13
-        "10.29.248.118",            //14
-        "10.29.248.52",             //15
-        "10.254.24.156",            //16, OR10, FR5
-        "10.254.24.157",            //17, OR11
-        "10.29.248.185",            //18
-        "10.29.248.66",             //19, OR12
-        "10.29.248.81",             //20, OR13
-        "10.29.248.213",            //21      , FR9
-        "10.29.248.155_PORT_1001",  //22, OR14
-        "10.29.248.155_PORT_1002",  //23, OR15, FR10
-        "10.29.248.124",            //24
-        "10.29.248.67",             //25, OR16
-        "10.29.248.157",            //26
-        "10.29.248.56",             //27      , FR12
+        "Capitol_Expy",             //0, OR1
+        "Alum_Rock_loop",             //0, OR1
+        "Alum_Rock_Diag",             //0, OR1
+        "McKee",             //0, OR1
+        "Berryessa",             //0, OR1
 }; //FR6, FR7, FR8, and FR11 are missing
 
 
@@ -154,12 +131,12 @@ int main(int argc, char *argv[])
     //int FR_occ_zero_counter[NumOnRamp] = {0};
 
 //	Example: metering_rates[0...10] = Calvine_EB_Metering_Rate...12th_St_Metering_Rate;
-	short metering_controller_db_vars[11] = {
-		3002,	//Calvine EB
-		3202,	//Calvine WB
-		3402,	//Mack Rd EB
-		3602,	//Mack Rd WB
-		3802,	//Florin Rd EB
+	short metering_controller_db_vars[] = {
+		3002,	//Capitol Expy
+		3202,	//Alum Rock Loop
+		3402,	//Alum Rock Diag
+		3602,	//McKee Diag
+		3802,	//Berryessa Diag
 	};
 	int counter = 0;
 
@@ -516,11 +493,11 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
 	  
 	  current_most_upstream_flow = mainline_out_f[1].agg_vol;
       // Use historical data only
-      ML_flow_ratio = ratio_ML_HIS_FLOW(current_most_upstream_flow, MOST_UPSTREAM_MAINLINE_FLOW_DATA, pts);
-      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i] , OR_HIS_FLOW_DATA, pts),50)); // interpolate missing value from table    
-      onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_occupancy_prev[i], OR_HIS_OCC_DATA, pts),5)); // interpolate missing value from table
-      offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),50)); // interpolate missing value from table
-      offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i], FR_HIS_OCC_DATA, pts),5)); // interpolate missing value from table 
+//      ML_flow_ratio = ratio_ML_HIS_FLOW(current_most_upstream_flow, MOST_UPSTREAM_MAINLINE_FLOW_DATA, pts);
+//      onramp_out_f[i].agg_vol = Mind(1000.0*N_OnRamp_Ln[i], Maxd(interp_OR_HIS_FLOW(i+1+5, OR_flow_prev[i] , OR_HIS_FLOW_DATA, pts),50)); // interpolate missing value from table    
+//      onramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_OR_HIS_OCC(i+1+5, OR_occupancy_prev[i], OR_HIS_OCC_DATA, pts),5)); // interpolate missing value from table
+//      offramp_out_f[i].agg_vol = Mind(1000.0*N_OffRamp_Ln[i], Maxd(interp_FR_HIS_FLOW(i+1,  FR_flow_prev[i] ,FR_HIS_FLOW_DATA, pts),50)); // interpolate missing value from table
+//      offramp_out_f[i].agg_occ = Mind(90.0, Maxd(interp_FR_HIS_OCC(i+1, FR_occupancy_prev[i], FR_HIS_OCC_DATA, pts),5)); // interpolate missing value from table 
       
 	  
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
@@ -566,10 +543,10 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out_f[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));
 			    
                 //fprintf(st_file_out,"Sec %d ", i); 
-			    fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_vol); //2,6,10,14,18,22,26,30,34,38,42,46
-                fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 		//3 ,7,11,15,19,23,27,31,35,39,43,47
-				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_occ); //4,8,12,16,20,24,28,32,36,40,44,48
-				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_density); //5,9,13,17,21,25,29,33,37,41,45,49
+			    fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_vol); //2,6,10,14,18,22
+                fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 		//3 ,7,11,15,19,23
+				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_occ); //4,8,12,16,20,24
+				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_density); //5,9,13,17,21,25
 
 
 		} 
@@ -583,14 +560,14 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
 				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
 				//fprintf(st_file_out,"OR %d ", i);//
-				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_vol); //50,54,58,62,66,70,74,78,82,86,90  			
-				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ); //51,55,59,63,67,71,75,79,83,87,91 
+				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_vol);      //26,32,38,44,50
+				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ);      //27,33,39,45,51
 				//fprintf(st_file_out,"\n");//
 				//fprintf(st_file_out,"FR %d ", i);//
-				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol); //52,56,60,64,68,72,76,80,84,88,92 
-				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ); //53,57,61,65,69,73,77,81,85,89,93 
-				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_vol);
-				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_occ);
+				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol);     //28,34,30,46,52
+				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ);     //29,35,31,47,53
+				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_vol);//30,36,32,48,54
+				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_occ);//31,37,33,49,55
 				//fprintf(st_file_out,"\n");//
 				
 				max_occ_2_dwn[i]=detection_s[i]->data[Np-1].occupancy;	
@@ -632,6 +609,9 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
 				}
 		}
 		
+		for (i = 0; i < num_controller_vars; i++)
+			for (j = 0; j < 4; j++)
+				fprintf(st_file_out,"%d ", controller_data3[i].metering_rate[j]);
 		fprintf(st_file_out,"\n");
 		
 		
@@ -639,13 +619,13 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
 		/*************************************************
 		   
 		      XYLu code start from here
-		
+	
 		**************************************************/
 		
-		det_data_4_contr(time);	
-		get_meas(time);		
-		update_q_R();
-		opt_metering();
+//		det_data_4_contr(time);	
+//		get_meas(time);		
+//		update_q_R();
+//		opt_metering();
 		
 		fprintf(cal_opt_f,"%lf ", time);   // Output calculated Opt RM rt
 		for (i=0;i<NumOnRamp;i++)
@@ -709,7 +689,7 @@ printf("Controller db var %d lane 1 rate %d action %d plan %d lane 2 rate %d act
 	urms_ctl[i].lane_4_action,
 	urms_ctl[i].lane_4_plan
 );
-			db_clt_write(pclt, metering_controller_db_vars[i], sizeof(db_urms_t), &urms_ctl[i]); 
+//			db_clt_write(pclt, metering_controller_db_vars[i], sizeof(db_urms_t), &urms_ctl[i]); 
 //FOR TEST PURPOSES ONLY###############################
 			}
 		//cycle_index++;
