@@ -12,29 +12,29 @@
 //#define DBG_COEFF
 
 	
-#define NumOnRamp           11	   // the number of onramp; SR99
-#define SecSize             12                // one more than NumOnRam
-#define use_CRM				2           // 1: default; 2: Opt CRM; 3: Coord ALINEA;  4: Hybrid
+#define NumOnRamp           	5	// the number of onramp; SR99
+#define SecSize             	6	// one more than NumOnRam
+#define use_CRM			2	// 1: default; 2: Opt CRM; 3: Coord ALINEA;  4: Hybrid
 
-#define VSL_Update_Step		2           // twice of time length for detection; .g if detection is 60s; VSL will be updated every 120s
-#define Occ_thresh			20.0        // 04_20_10; 25: 05_12_12; 12.5 used for I-80 which was good; 15.0 used
-#define rm_band				450.0		// default: 400
+#define VSL_Update_Step		2	// twice of time length for detection; .g if detection is 60s; VSL will be updated every 120s
+#define Occ_thresh		20.0        // 04_20_10; 25: 05_12_12; 12.5 used for I-80 which was good; 15.0 used
+#define rm_band			450.0		// default: 400
 #define reduction_coeff		0.075
 #define increase_coeff		0.15
 //#define RELEASE_CYCLE_LEN   10.0
-#define RELEASE_OCC         70.0
-#define DEMAND_CHANGE       1           // 0: no change; 1: selective onramp dmd change; 2: all onramp dmd change // 02_20_14
+#define RELEASE_OCC		70.0
+#define DEMAND_CHANGE       	1           // 0: no change; 1: selective onramp dmd change; 2: all onramp dmd change // 02_20_14
 //#define SWITCHING_METERING  1
-#define Gain_Up				8.0
-#define Gain_Dn				4.0
-#define Occ_Cr				12.0
+#define Gain_Up			8.0
+#define Gain_Dn			4.0
+#define Occ_Cr			12.0
 
 //#define CellSize 15
-#define ALLvehType          0
+#define ALLvehType          	0
 #define ShortSecSize		30
-#define NumLnDetector       27     //
-#define NumCrossDetector    30
-#define max_onramp_ln       3
+#define NumLnDetector       	27     //
+#define NumCrossDetector    	30
+#define max_onramp_ln       	3
 #define max_mainline_ln		5
 #define dmd_up_t            (30.0*60.0)     //[s]: 6:30am; this needs to be changed dynamically
 #define dmd_dwn_t           (120.0*60.0)    //[s]: 8:00am
@@ -142,8 +142,8 @@ const int ln_meteringId[16][max_onramp_ln]={{21044,21045,21046},{19780,0,0},{197
 
 	static int release_cycle[NumOnRamp][max_onramp_ln]={{0,0,0}};
 //	static float actual_r[NumOnRamp][max_onramp_ln]={{0.0,0.0,0.0}};
-	static float total_rt[NumOnRamp]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-	static float total_field_rt[NumOnRamp]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+	static float total_rt[NumOnRamp]={0.0};
+	static float total_field_rt[NumOnRamp]={0.0};
 	
 	static float L[SecSize]={555.2,1562.0,455.4,1971.8,440.2,2402.1,427.6,1509.9,374.4,1374.9,377.9,1863.9};  // composite length; including most downstream sec; 1st section has no meter; 10_21_13
 	const float Q[SecSize]={2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2050.0,2050.0,2050.0,2000.0,2000.0,2000.0};	 //onramp flow capacity
