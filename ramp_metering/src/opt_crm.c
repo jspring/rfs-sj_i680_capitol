@@ -61,6 +61,51 @@ const char *controller_strings[] = {
 }; //FR6, FR7, FR8, and FR11 are missing
 
 
+#define NOCTL   		0
+#define CTL     		1
+#define MAX_ART_PER_RAMP	7
+
+typedef struct {
+        char *name;
+        unsigned char ctl_permission;
+        unsigned char ctl_state;
+        unsigned char pattern;
+	int db_var;
+} arterial_desc_t;
+
+arterial_desc_t arterial_desc[] = {
+        {"Alum_Rock", NOCTL, NOCTL, 0, 4000},
+        {"Wilbur", NOCTL, NOCTL, 0, 4100},
+        {"Florence", NOCTL, NOCTL, 0, 4200},
+        {"McKee", CTL, NOCTL, 20, 4300},
+        {"Madden", CTL, NOCTL, 20, 4400},
+        {"Gay", CTL, NOCTL, 20, 4500},
+        {"Berryessa", CTL, NOCTL, 20, 4600},
+        {"Penitencia_Creek", CTL, NOCTL, 20, 4700},
+        {"Gilchrist", CTL, NOCTL, 20, 4800},
+        {"Mabury", CTL, NOCTL, 20, 4900},
+        {"Rainfield", CTL, NOCTL, 20, 5000},
+        {"Gianotta", CTL, NOCTL, 20, 5100},
+        {"Capitol_Square", CTL, NOCTL, 20, 5200},
+};
+
+#define NUM_ARTERIAL_CONTROLLERS  sizeof(arterial_desc)/sizeof(arterial_desc_t)
+
+typedef struct {
+        char *name;
+        int arterial_index[7];
+}ramp_meter_desc_t;
+
+ramp_meter_desc_t ramp_meter_desc[] = {
+        {"Alum_Rock", {0, 1, 2, -1, -1, -1, -1}},
+        {"McKee", {3, 4, 5, -1, -1, -1, -1}},
+        {"Berryessa", {6, 7, 8, 9, 10, 11, 12}},
+};
+
+#define NUM_RAMP_CONTROLLERS    sizeof(ramp_meter_desc)/sizeof(ramp_meter_desc_t)
+
+int set_pattern(int i, ramp_meter_desc_t *ramp_meter_desc[], unsigned char ctl);
+
 int main(int argc, char *argv[])
 {
 	timestamp_t ts;
@@ -123,6 +168,8 @@ int main(int argc, char *argv[])
 	float temp_ary_OR_queue_detector_occ[NUM_CYCLE_BUFFS] = {0}; 
 	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0};
+	int arterial_desc_index = 0;
+	int do_arterial_control[NUM_RAMP_CONTROLLERS] = {0};
 
 	//int num_zero_tolerant = 10;
     //int OR_flow_zero_counter[NumOnRamp] = {0};
@@ -614,14 +661,39 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
 				fprintf(st_file_out,"%d ", controller_data3[i].metering_rate[j]);
 		fprintf(st_file_out,"\n");
 		
-		
+
+		for( i = 0; i < NUM_RAMP_CONTROLLERS; i++)
+		{
+			if( do_arterial_control[i] != 0) 							//global control permission
+			{
+			    for( j = 0; j < MAX_ART_PER_RAMP; j++) { 
+				if( (	(arterial_desc_index = ramp_meter_desc[i].arterial_index[j]) >= 0) &&		//does this ramp meter control this arterial controller? 
+					(arterial_desc[arterial_desc_index].ctl_permission == CTL) )  			//per ramp meter control permission
+				{
+						if((controller_onramp_queue_detector_data[i].agg_occ > 40) &&		//queue occupancy condition for control 
+							(arterial_desc[arterial_desc_index].ctl_state != CTL) ) 	//previous state of control was NOCTL
+						{
+							arterial_desc[arterial_desc_index].ctl_state = CTL; 		//set control to CTL
+							db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
+						}
+						else
+						if( (controller_onramp_queue_detector_data[i].agg_occ <= 40) &&
+							(arterial_desc[arterial_desc_index].ctl_state == CTL) ) 	//previous state of control was CTL
+						{
+								arterial_desc[arterial_desc_index].ctl_state = NOCTL; 	//set control to NOCTL
+								db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
+						}
+				}
+			    }
+			}
+		}
+
 		
 		/*************************************************
 		   
 		      XYLu code start from here
 	
-		**************************************************/
-		
+		**************************************************/ 
 //		det_data_4_contr(time);	
 //		get_meas(time);		
 //		update_q_R();
