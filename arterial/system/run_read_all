@@ -1,0 +1,9 @@
+#!/bin/bash
+
+killall ab3418comm
+
+while [[ 1 ]]
+do
+	/home/sj_i680_capitol/arterial/system/read_all
+	sleep 1
+done	

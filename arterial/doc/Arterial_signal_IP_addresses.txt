@@ -1,0 +1,15 @@
+# Arterial Name				IP address	Ramp meter
+Capitol_Ave._at_Wilbur_Ave. 		10.192.131.9 	"Alum Rock diag"
+Capitol_Ave._at_Florence_Ave. 		10.192.131.8 	"Alum Rock diag"
+Capitol_Ave._at_Alum_Rock_Ave. 		10.192.131.60 	"Alum Rock diag OR loop"
+Capitol_Ave._at_Madden_Ave. 		10.192.131.7 	McKee
+Capitol_Ave._at_Gay_Ave. 		10.192.131.6 	McKee
+Capitol_Ave._at_McKee_Rd. 		10.192.131.1 	McKee
+Capitol_Ave._at_Capitol_Square_Mall 	10.192.131.10 	Berryessa
+Capitol_Ave._at_Giannotta_Way 		10.192.131.11 	Berryessa
+Capitol_Ave._at_Rainfield_Dr. 		10.192.131.12 	Berryessa
+Capitol_Ave._at_Mabury_Rd. 		10.192.131.13 	Berryessa
+Capitol_Ave._at_Gilchrist_Dr. 		10.192.131.14 	Berryessa
+Capitol_Ave._at_Penitencia_Creek_Dr. 	10.192.131.15 	Berryessa
+Capitol_Ave._at_Berryessa_Rd. 		10.192.131.16 	Berryessa
+Alum_Rock_Ave._at_Alexander_Ave. 	10.192.131.59 	Berryessa
