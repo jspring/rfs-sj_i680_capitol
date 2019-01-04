@@ -21,6 +21,9 @@
 #include "look_up_table.h"
 #include "rm_algo.h"
 #include "clt_vars.h"
+#include <db_include.h>
+#include <msgs.h>
+#include <ab3418_lib.h>
 
 char str[len_str];
 
@@ -71,22 +74,24 @@ typedef struct {
         unsigned char ctl_state;
         unsigned char pattern;
 	int db_var;
+	char *ipaddr;
 } arterial_desc_t;
 
 arterial_desc_t arterial_desc[] = {
-        {"Alum_Rock", NOCTL, NOCTL, 0, 4000},
-        {"Wilbur", NOCTL, NOCTL, 0, 4100},
-        {"Florence", NOCTL, NOCTL, 0, 4200},
-        {"McKee", CTL, NOCTL, 20, 4300},
-        {"Madden", CTL, NOCTL, 20, 4400},
-        {"Gay", CTL, NOCTL, 20, 4500},
-        {"Berryessa", CTL, NOCTL, 20, 4600},
-        {"Penitencia_Creek", CTL, NOCTL, 20, 4700},
-        {"Gilchrist", CTL, NOCTL, 20, 4800},
-        {"Mabury", CTL, NOCTL, 20, 4900},
-        {"Rainfield", CTL, NOCTL, 20, 5000},
-        {"Gianotta", CTL, NOCTL, 20, 5100},
-        {"Capitol_Square", CTL, NOCTL, 20, 5200},
+        {"Wilbur", NOCTL, NOCTL, 0, 4000, "10.192.131.9"},
+        {"Florence", NOCTL, NOCTL, 0, 4100, "10.192.131.8"},
+        {"Alum_Rock", NOCTL, NOCTL, 0, 4200, "10.192.131.60"},
+        {"Madden", CTL, NOCTL, 20, 4300, "10.192.131.7"},
+        {"Gay", CTL, NOCTL, 20, 4400, "10.192.131.6"},
+        {"McKee", CTL, NOCTL, 20, 4500, "10.192.131.1"},
+        {"Capitol_Square", CTL, NOCTL, 20, 4600, "10.192.131.10"},
+        {"Gianotta", CTL, NOCTL, 20, 4700, "10.192.131.11"},
+        {"Rainfield", CTL, NOCTL, 20, 4800, "10.192.131.12"},
+        {"Mabury", CTL, NOCTL, 20, 4900, "10.192.131.13"},
+        {"Gilchrist", CTL, NOCTL, 20, 5000, "10.192.131.14"},
+        {"Penitencia_Creek", CTL, NOCTL, 20, 5200, "10.192.131.15"},
+        {"Berryessa", CTL, NOCTL, 20, 5300, "10.192.131.16"},
+        {"Alexander", CTL, NOCTL, 20, 5400, "10.192.131.59"},
 };
 
 #define NUM_ARTERIAL_CONTROLLERS  sizeof(arterial_desc)/sizeof(arterial_desc_t)
@@ -97,7 +102,7 @@ typedef struct {
 }ramp_meter_desc_t;
 
 ramp_meter_desc_t ramp_meter_desc[] = {
-        {"Alum_Rock", {0, 1, 2, -1, -1, -1, -1}},
+//        {"Alum_Rock", {0, 1, 2, -1, -1, -1, -1}},
         {"McKee", {3, 4, 5, -1, -1, -1, -1}},
         {"Berryessa", {6, 7, 8, 9, 10, 11, 12}},
 };
@@ -112,12 +117,15 @@ int main(int argc, char *argv[])
 	timestamp_t *pts = &ts;
 	float time = 0, time2 = 0,timeSta = 0, tmp=0.0;
 	static int init_sw=1;
-	int i, j;
+	int i, j, k, l;
+	float john_occ_temp;
 	int min_index;
 	db_urms_t urms_ctl[NumOnRamp] = {{0}};
 	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status2_t controller_data2[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status3_t controller_data3[NUM_CONTROLLER_VARS/6];  //See warning at top of file
+
+	get_long_status8_resp_mess_typ arterial_controllers[NUM_ARTERIAL_CONTROLLERS]; //arterial controllers
 
 	int option;
 	int exitsig;
@@ -255,14 +263,16 @@ int main(int argc, char *argv[])
 		Init_sim_data_io();
 		init_sw=0;
 	}
-	if(debug)
-		num_controller_vars = 2; //Use just the first two controllers in the list, i.e. 10.29.248.108 and 10.254.25.113.
 
+	printf("NUM_CONTROLLER_VARS %d NUM_CONTROLLER_VARS/6 %d num_controller_vars %d\n", NUM_CONTROLLER_VARS, NUM_CONTROLLER_VARS/6, num_controller_vars); 
 	for (i = 0; i < num_controller_vars; i++){   //See warning at top of file
 		db_clt_read(pclt, db_controller_list[i].id, db_controller_list[i].size, &controller_data[i]);
 		db_clt_read(pclt, db_controller_list[i+15].id, db_controller_list[i+15].size, &controller_data2[i]);
 		db_clt_read(pclt, db_controller_list[i+20].id, db_controller_list[i+20].size, &controller_data3[i]);
 	}
+
+	for (i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++)
+		db_clt_read(pclt, arterial_desc[i].db_var, sizeof(get_long_status8_resp_mess_typ), &arterial_controllers[i]);
 
 //BEGIN MAIN FOR LOOP HERE
 	for(;;)	
@@ -275,6 +285,8 @@ int main(int argc, char *argv[])
 		db_clt_read(pclt, db_controller_list[i+15].id, db_controller_list[i+15].size, &controller_data2[i]);
 		db_clt_read(pclt, db_controller_list[i+20].id, db_controller_list[i+20].size, &controller_data3[i]);
 	}
+	for (i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++)
+		db_clt_read(pclt, arterial_desc[i].db_var, sizeof(get_long_status8_resp_mess_typ), &arterial_controllers[i]);
 
 /*#################################################################################################################
 ###################################################################################################################*/
@@ -322,7 +334,7 @@ int main(int argc, char *argv[])
 
         //fprintf(dbg_st_file_out,"C%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); //2
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); //3
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); //3,16,29,42,55
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_speed); //4
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_density); //5
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_mean_speed);//6
@@ -659,34 +671,54 @@ int secCTidx [SecSize][4] =  {{7,  -1, -1, -1}, // controller in section 1
 		for (i = 0; i < num_controller_vars; i++)
 			for (j = 0; j < 4; j++)
 				fprintf(st_file_out,"%d ", controller_data3[i].metering_rate[j]);
-		fprintf(st_file_out,"\n");
 		
-
 		for( i = 0; i < NUM_RAMP_CONTROLLERS; i++)
 		{
-			if( do_arterial_control[i] != 0) 							//global control permission
-			{
-			    for( j = 0; j < MAX_ART_PER_RAMP; j++) { 
+//			if( do_arterial_control[i] != 0) 							//global control permission
+//			{
+			    for( j = 0; j < MAX_ART_PER_RAMP; j++) 
+			    { 
 				if( (	(arterial_desc_index = ramp_meter_desc[i].arterial_index[j]) >= 0) &&		//does this ramp meter control this arterial controller? 
 					(arterial_desc[arterial_desc_index].ctl_permission == CTL) )  			//per ramp meter control permission
 				{
-						if((controller_onramp_queue_detector_data[i].agg_occ > 40) &&		//queue occupancy condition for control 
-							(arterial_desc[arterial_desc_index].ctl_state != CTL) ) 	//previous state of control was NOCTL
+					l = 0;
+					john_occ_temp = 0;
+					for(k=0; k<3; k++) {
+						if(controller_data2[i].queue_stat[k][0].stat == 2) {
+							john_occ_temp += 0.1 * ((controller_data2[i].queue_stat[k][0].occ_msb << 8) + controller_data2[i].queue_stat[k][0].occ_lsb); 
+							l++;
+						}
+					}
+					if(l > 0) {
+						john_occ_temp /= l;
+// Original occupancy threshold					if((controller_onramp_queue_detector_data[i].agg_occ > 40) &&		//queue occupancy condition for control 
+						if((john_occ_temp > 40) &&		//queue occupancy condition for control 
+						(arterial_desc[arterial_desc_index].ctl_state != CTL) ) 	//previous state of control was NOCTL
 						{
 							arterial_desc[arterial_desc_index].ctl_state = CTL; 		//set control to CTL
-							db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
-						}
-						else
-						if( (controller_onramp_queue_detector_data[i].agg_occ <= 40) &&
-							(arterial_desc[arterial_desc_index].ctl_state == CTL) ) 	//previous state of control was CTL
-						{
-								arterial_desc[arterial_desc_index].ctl_state = NOCTL; 	//set control to NOCTL
+							if(!debug)							//for debugging control state setting
 								db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
 						}
+						else {
+// Original occupancy threshold					if( (controller_onramp_queue_detector_data[i].agg_occ <= 30) &&
+							if( (john_occ_temp <= 30) &&
+							(arterial_desc[arterial_desc_index].ctl_state == CTL) )  	//previous state of control was CTL
+							{
+								arterial_desc[arterial_desc_index].ctl_state = NOCTL; 	//set control to NOCTL
+								if(!debug)							//for debugging control state setting
+									db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
+							}
+						}
+					}
 				}
+				fprintf(st_file_out,"%d %d %d %d %.2f ", i, j, arterial_desc_index, arterial_desc[arterial_desc_index].ctl_state, john_occ_temp);
 			    }
-			}
+//			}
 		}
+		for (i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++)
+			print_status(NULL, st_file_out, &arterial_controllers[i], 0);
+
+		fprintf(st_file_out,"\n");
 
 		
 		/*************************************************
@@ -780,21 +812,20 @@ printf("Controller db var %d lane 1 rate %d action %d plan %d lane 2 rate %d act
 int Init_sim_data_io()
 {	
 	st_file=fopen("In_Data/state_var.txt","r");	
-	
 	dbg_f=fopen("Out_Data/dbg_file.txt","w");
-	
 	local_rm_f=fopen("Out_Data/local_rm_rate.txt","w");
-    
-    cal_opt_f=fopen("Out_Data/cal_opt_RT_rt.txt","w");
-    
-    st_file_out=fopen("Out_Data/state_var_out.txt","w");	
-    dbg_st_file_out =fopen("Out_Data/dbg_state_var_out.txt","w");	
-    
-    Ln_RM_rt_f=fopen("Out_Data/lanewise_rt.txt","w");	
-	
+	cal_opt_f=fopen("Out_Data/cal_opt_RT_rt.txt","w");
+	st_file_out=fopen("Out_Data/state_var_out.txt","w");	
+	dbg_st_file_out =fopen("Out_Data/dbg_state_var_out.txt","w");	
+	Ln_RM_rt_f=fopen("Out_Data/lanewise_rt.txt","w");	
 	pp=fopen("Out_Data/coeff.txt","w");
-		
-	
+//	dbg_f=fopen("/linux2/big/data/SANJOSE_ACRM/Out_Data/dbg_file.txt","w");
+//	local_rm_f=fopen("/linux2/big/data/SANJOSE_ACRM/Out_Data/local_rm_rate.txt","w");
+//	cal_opt_f=fopen("/linux2/big/data/SANJOSE_ACRM/Out_Data/cal_opt_RT_rt.txt","w");
+//	st_file_out=fopen("/linux2/big/data/SANJOSE_ACRM/Out_Data/state_var_out.txt","w");	
+//	dbg_st_file_out =fopen("/linux2/big/data/SANJOSE_ACRM/Out_Data/dbg_state_var_out.txt","w");	
+//	Ln_RM_rt_f=fopen("/linux2/big/data/SANJOSE_ACRM/Out_Data/lanewise_rt.txt","w");	
+//	pp=fopen("/linux2/big/data/SANJOSE_ACRM/Out_Data/coeff.txt","w");
 	return 1;
 }
 
@@ -936,7 +967,7 @@ int update_queue(float time)  // This will not be used since we have onramp leng
 	return 1;
 }
 
-
+/*
 int det_data_4_contr(float time) // not used anymore
 {
 	int i,j;
@@ -972,6 +1003,7 @@ int det_data_4_contr(float time) // not used anymore
 	
 	return 1;
 }
+*/
 
 int update_q_R()       // update flow for each cell
 {
