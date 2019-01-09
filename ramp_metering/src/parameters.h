@@ -13,7 +13,7 @@
 
 	
 #define NumOnRamp           	5	// the number of onramp; SR99
-#define SecSize             	6	// one more than NumOnRam
+#define SecSize             	4	// one more than NumOnRam
 #define use_CRM			2	// 1: default; 2: Opt CRM; 3: Coord ALINEA;  4: Hybrid
 
 #define VSL_Update_Step		2	// twice of time length for detection; .g if detection is 60s; VSL will be updated every 120s
