@@ -228,6 +228,7 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
 	/* Read the time of day.  This will be used as the "official
 	 * timestamp" in all of the files. */
 		get_current_timestamp(&timestamp);
+print_timestamp(stdout, &timestamp);
 
                 /* Read in all DB vars, whether or not the associated files
                  * are being written
@@ -255,6 +256,7 @@ db_vars_ac_rm[3].id = DB_URMS_DATAFILE_VAR
 		}
 
 		if(use_stdout) {
+print_timestamp(stdout, &timestamp);
 			save_to_spec(stdout, timestamp, 0,
                                 pbuff_ac_rm, num_file_columns,
                                 &file_spec[0]);

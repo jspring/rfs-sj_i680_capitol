@@ -7,7 +7,7 @@
 
 // define the array size of look up table here
 #define	NUM_5MIN_INTERVALS	288
-#define	NUM_ONRAMPS_PLUS_1	17
+#define	NUM_ONRAMPS_PLUS_1	6
 #define NUM_OFFRAMPS_PLUS_1	13
 #define MIN_HARMONIC_SPEED	10.0    // km/hr
 #define MAX_HARMONIC_SPEED	120.0   // km/hr 
