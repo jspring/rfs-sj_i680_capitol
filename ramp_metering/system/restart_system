@@ -4,23 +4,24 @@ if [[ z`ps -ef | grep db_slv | grep -v grep` == 'z' ]]
 then
 	echo "Starting urmsgo_all 30000"
 	/home/sj_i680_capitol/ramp_metering/system/urmsgo_all 30000
+	/home/sj_i680_capitol/arterial/system/data_file_2_database.sh
 	exit 1
 fi
 
 TIMESTAMP=`date +%m%Y%d_%H%M%S`
-RESTART_LOGFILE=/big/data/ac_rm_1/restart_$TIMESTAMP
+RESTART_LOGFILE=/linux2/big/data/SANJOSE_ACRM/restart_$TIMESTAMP
 
-for x in `cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep urmsgo | grep system | awk '{print $2}'`
+for x in `cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep urmsgo | grep system | grep -v '^#' | awk '{print $2}'`
 do 
 	CONTROLLER_IP=$x
-	URMS_STATUS_DBNUM=`cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $x | awk '{print $3}'`
-	PORT=`cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $x | awk '{print $4}'`
+	URMS_STATUS_DBNUM=`cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $x | grep -v '^#' | awk '{print $3}'`
+	PORT=`cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $x | grep -v '^#' | awk '{print $4}'`
 	NUM_CONTROLLERS=1
 
 	URMS_STATUS_DBNUM2=`echo $URMS_STATUS_DBNUM | awk '{print $2}'`
-echo PORT1 $PORT  URMS_STATUS_DBNUM2  $URMS_STATUS_DBNUM2 >>$RESTART_LOGFILE
+echo CONTROLLER_IP $CONTROLLER_IP PORT $PORT DBNUM $URMS_STATUS_DBNUM >>$RESTART_LOGFILE
 
-	if [[ q$URMS_STATUS_DBNUM2 != 'q' ]]
+	if [[ q$URMS_STATUS_DBNUM2 != 'q' ]] # Some modems had 2 controllers on their LANs, with different ports assigned
 	then
 		PORT2=`echo $PORT | awk '{print $2}'`
 		PORT=`echo $PORT | awk '{print $1}'`
@@ -36,13 +37,14 @@ echo PORT11 $PORT INDEX $INDEX >>$RESTART_LOGFILE
 		if [[ m`ps -ef | grep wrfiles_rm | grep $x | grep -v grep` == 'm' ]]
 		then 
        		 	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP" >>$RESTART_LOGFILE
-			/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i 30000 -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/big/data/ac_rm_1/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+			/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /linux2/big/data/SANJOSE_ACRM -i 30000 -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/linux2/big/data/SANJOSE_ACRM/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
 			sleep 5
 		fi
 
 echo PORT2 $PORT
 		#Check good data in log file, and kill urms if it's all the same (except for the timestamp)
-		for FILE in `ls -tr /big/data/ac_rm_1/*.dat |tail -28 | grep $CONTROLLER_IP | grep $PORT`
+# 28 was for sr99		for FILE in `ls -tr /linux2/big/data/SANJOSE_ACRM/*.dat |tail -28 | grep $CONTROLLER_IP | grep $PORT`
+		for FILE in `ls -tr /linux2/big/data/SANJOSE_ACRM/*.dat |tail -50 | grep $CONTROLLER_IP | grep $PORT | tail -1`
 		do
 			NOW=`date +%s`
 			OPEN=`stat $FILE -c %X`
@@ -54,10 +56,10 @@ echo NOW $NOW OPEN $OPEN FILE $FILE
 				if [[ $NUMDIFF -lt 3 ]]
 				then 
 					PID=`ps -elf | grep  urms | grep $CONTROLLER_IP | grep $PORT | awk '{print $4}'`
-					if [[ q$PID != 'q' ]]
+					if [[ q$PID == 'q' ]]
 					then
 						echo $CONTROLLER_IP $PORT no good >>$RESTART_LOGFILE
-						{ echo "super user" ; sleep 2; echo "break"; sleep 1; } | telnet $CONTROLLER_IP 231
+# telnet only works for sr99			{ echo "super user" ; sleep 2; echo "break"; sleep 1; } | telnet $CONTROLLER_IP 231
 						sudo kill $PID
 					fi
 				fi
@@ -69,17 +71,16 @@ echo NOW $NOW OPEN $OPEN FILE $FILE
 echo PORT3 $PORT
 		netstat -an | grep $CONTROLLER_IP | grep $PORT
 		if [[ $? -ne 0 ]] 
-#		if [[ q`ps -ef | grep urms | grep $x | grep -v grep` == 'q' ]]
 		then 
-			echo $x urms process not running. Attempting restart.... >>$RESTART_LOGFILE
+			echo $CONTROLLER_IP urms process not running. Attempting restart.... >>$RESTART_LOGFILE
 
-			cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $CONTROLLER_IP | grep control
+			cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $CONTROLLER_IP | grep control | grep -v '^#'
 			if [[ $? == 0 ]]
 			then			
-				/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+				/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/linux2/big/data/SANJOSE_ACRM/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
 				CONTROL=under_control
 			else
-				/home/atsc/urms/lnx/urms -n -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/big/data/ac_rm_1/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+				/home/atsc/urms/lnx/urms -n -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/linux2/big/data/SANJOSE_ACRM/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
 				CONTROL=no_control
 			fi
 			echo CONTROLLER_IP $CONTROLLER_IP URMS_STATUS_DBNUM $URMS_STATUS_DBNUM PORT $PORT $CONTROL >>$RESTART_LOGFILE
@@ -93,5 +94,6 @@ done
 if [[ z`ps -ef | grep opt_crm | grep -v grep` == 'z' ]]
 then
 	cd /home/sj_i680_capitol/ramp_metering/src
-	./lnx/opt_crm -i $INTERVAL >/dev/null &
+	./lnx/opt_crm -i $INTERVAL -d >/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
+#	./lnx/opt_crm -i $INTERVAL >/dev/null &
 fi

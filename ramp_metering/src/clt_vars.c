@@ -76,6 +76,18 @@ int main(int argc, char *argv[])
 		zero_array);
 	}
         
+	if ((pclt = db_list_init(argv[0], hostname, domain, xport, 
+			db_arterial_list, NUM_ARTERIAL_VARS, NULL, 0)) == NULL) {
+		printf("Database initialization error in %s.\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+	for (i = 0; i < NUM_ARTERIAL_VARS; i++){
+		db_clt_write(pclt,
+		db_arterial_list[i].id,
+		db_arterial_list[i].size,
+		zero_array);
+	}
+        
 	/* Setup a timer for every 'interval' msec. */
 	if ((ptimer = timer_init(interval, DB_CHANNEL(pclt) )) == NULL) {
 		printf("Unable to initialize wrfiles timer\n");

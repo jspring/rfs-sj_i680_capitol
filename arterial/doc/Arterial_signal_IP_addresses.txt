@@ -1,15 +1,15 @@
-# Arterial Name				IP address	Ramp meter
-Capitol_Ave._at_Wilbur_Ave. 		10.192.131.9 	"Alum Rock diag"
-Capitol_Ave._at_Florence_Ave. 		10.192.131.8 	"Alum Rock diag"
-Capitol_Ave._at_Alum_Rock_Ave. 		10.192.131.60 	"Alum Rock diag OR loop"
-Capitol_Ave._at_Madden_Ave. 		10.192.131.7 	McKee
-Capitol_Ave._at_Gay_Ave. 		10.192.131.6 	McKee
-Capitol_Ave._at_McKee_Rd. 		10.192.131.1 	McKee
-Capitol_Ave._at_Capitol_Square_Mall 	10.192.131.10 	Berryessa
-Capitol_Ave._at_Giannotta_Way 		10.192.131.11 	Berryessa
-Capitol_Ave._at_Rainfield_Dr. 		10.192.131.12 	Berryessa
-Capitol_Ave._at_Mabury_Rd. 		10.192.131.13 	Berryessa
-Capitol_Ave._at_Gilchrist_Dr. 		10.192.131.14 	Berryessa
-Capitol_Ave._at_Penitencia_Creek_Dr. 	10.192.131.15 	Berryessa
-Capitol_Ave._at_Berryessa_Rd. 		10.192.131.16 	Berryessa
-Alum_Rock_Ave._at_Alexander_Ave. 	10.192.131.59 	Berryessa
+# Arterial Name				IP address	Ramp meter		Database variable
+Capitol_Ave._at_Wilbur_Ave. 		10.192.131.9 	"Alum_Rock_diag"	4000
+Capitol_Ave._at_Florence_Ave. 		10.192.131.8 	"Alum_Rock_diag"	4100
+Capitol_Ave._at_Alum_Rock_Ave. 		10.192.131.60 	"Alum_Rock_diag_OR_loop" 4200
+Capitol_Ave._at_Madden_Ave. 		10.192.131.7 	McKee			4300
+Capitol_Ave._at_Gay_Ave. 		10.192.131.6 	McKee			4400
+Capitol_Ave._at_McKee_Rd. 		10.192.131.1 	McKee			4500
+Capitol_Ave._at_Capitol_Square_Mall 	10.192.131.10 	Berryessa		4600
+Capitol_Ave._at_Giannotta_Way 		10.192.131.11 	Berryessa		4700
+Capitol_Ave._at_Rainfield_Dr. 		10.192.131.12 	Berryessa		4800
+Capitol_Ave._at_Mabury_Rd. 		10.192.131.13 	Berryessa		4900
+Capitol_Ave._at_Gilchrist_Dr. 		10.192.131.14 	Berryessa		5000
+Capitol_Ave._at_Penitencia_Creek_Dr. 	10.192.131.15 	Berryessa		5100
+Capitol_Ave._at_Berryessa_Rd. 		10.192.131.16 	Berryessa		5200
+Alum_Rock_Ave._at_Alexander_Ave. 	10.192.131.59 	Berryessa		5300

@@ -1,0 +1,90 @@
+Column number of first field for arterial controller 1 is 147. Column of
+pattern is 211, first volume 216, first occupancy 217. After that, add 85 to
+each succeeding value. 
+
+
+1:  Ring 0 Phase number
+2:  Ring 0 Phase color
+3:  Ring 0 Phase interval string
+4:  Ring 0 Phase interval
+5:  Ring 1 Phase number
+6:  Ring 1 Phase color 
+7:  Ring 1 Phase interval string
+8:  Ring 1 Phase interval
+9:  Bits 4-7 yellow overlaps A-D 
+10: Bits 0-3 green overlaps A-D
+11: Detector 28
+12: Detector 27
+13: Detector 26
+14: Detector 25
+15: Detector 24
+16: Detector 23
+17: Detector 22
+18: Detector 21
+19: Detector 20
+20: Detector 19
+21: Detector 18
+22: Detector 17
+23: Detector 16
+24: Detector 15
+25: Detector 14
+26: Detector 13
+27: Detector 12
+28: Detector 11
+29: Detector 10
+30: Detector 9
+31: Detector 8
+32: Detector 7
+33: Detector 6
+34: Detector 5
+35: Detector 4
+36: Detector 3
+37: Detector 2
+38: Detector 1
+39: Master background cycle clock.  Counts up to cycle length 
+40: Sample sequence number 
+41: Phase 8 call
+42: Phase 7 call
+43: Phase 6 call
+44: Phase 5 call
+45: Phase 4 call
+46: Phase 3 call
+47: Phase 2 call
+48: Phase 1 call
+49: Ped 8 call
+50: Ped 7 call
+51: Ped 6 call
+52: Ped 5 call
+53: Ped 4 call
+54: Ped 3 call
+55: Ped 2 call
+56: Ped 1 call
+57: Bit 7 = critical alarm
+58: Bit 6 = non-critical alarm
+59: Bit 5 = detector fault
+60: Bit 4 = coordination alarm
+61: Bit 3 = local override
+62: Bit 2 = passed local zero
+63: Bit 1 = cabinet flash
+64: Bit 0 = preempt
+65: Pattern (0-250, 251-253 reserved, 254 flash, 255 free) 
+66: Bit 6 = pattern transition, bit 7 unused 
+67: RR 2
+68: RR 1
+69: Bits 0-1 EV A-D, bits 4-6 RR 1-2,
+70: System detector 1 volume
+71: System detector 1 occupancy //Value 0-200 = detector occupancy in
+72: System detector 2 volume
+73: System detector 2 occupancy
+74: System detector 3 volume
+75: System detector 3 occupancy
+76: System detector 4 volume
+77: System detector 4 occupancy
+78: System detector 5 volume
+79: System detector 5 occupancy
+80: System detector 6 volume
+81: System detector 6 occupancy
+82: System detector 7 volume
+83: System detector 7 occupancy
+84: System detector 8 volume
+85: System detector 8 occupancy

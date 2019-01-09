@@ -17,6 +17,7 @@ PATH_OBJS += $(OBJDIR)/simp1.o
 PATH_OBJS += $(OBJDIR)/simp2.o
 PATH_OBJS += $(OBJDIR)/simp3.o
 PATH_OBJS += $(OBJDIR)/simplx.o
+PATH_OBJS += /home/atsc/ab3418/lnx/ab3418_lib.o
 #cc  opt_crm.c nrutil2.c simp1.c simp2.c simp3.c simplx.c -o crm_test
 
 PATH_LDFLAGS += -L./lnx -L$(ATSC_LIB_DIR)
