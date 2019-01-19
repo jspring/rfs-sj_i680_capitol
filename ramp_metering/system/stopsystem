@@ -1,0 +1,29 @@
+#!/bin/bash
+
+echo "Stopping opt_crm"
+killall opt_crm
+sleep 1
+
+echo "Stopping wrfiles_rm"
+killall wrfiles_rm
+sleep 1
+killall -s KILL wrfiles_rm
+sleep 1
+
+echo "Stopping ab3418comm"
+killall ab3418comm
+sleep 1
+
+echo "Stopping urms"
+killall urms
+sleep 1
+
+echo "Stopping clt_vars"
+killall clt_vars
+sleep 1
+
+echo "Stopping db_slv"
+killall db_slv
+sleep 1
+
+/home/path/db/db_clean.sh
