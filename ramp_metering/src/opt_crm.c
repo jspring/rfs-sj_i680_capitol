@@ -69,6 +69,7 @@ const char *controller_strings[] = {
 
 typedef struct {
         char *name;
+	int controlling_rm_index;
         unsigned char ctl_permission;
         unsigned char ctl_state;
         unsigned char pattern;
@@ -77,20 +78,20 @@ typedef struct {
 } arterial_desc_t;
 
 arterial_desc_t arterial_desc[] = {
-        {"Wilbur", NOCTL, NOCTL, 0, 4000, "10.192.131.9"},
-        {"Florence", NOCTL, NOCTL, 0, 4100, "10.192.131.8"},
-        {"Alum_Rock", NOCTL, NOCTL, 0, 4200, "10.192.131.60"},
-        {"Madden", CTL, NOCTL, 20, 4300, "10.192.131.7"},
-        {"Gay", CTL, NOCTL, 20, 4400, "10.192.131.6"},
-        {"McKee", CTL, NOCTL, 20, 4500, "10.192.131.1"},
-        {"Capitol_Square", CTL, NOCTL, 20, 4600, "10.192.131.10"},
-        {"Gianotta", CTL, NOCTL, 20, 4700, "10.192.131.11"},
-        {"Rainfield", CTL, NOCTL, 20, 4800, "10.192.131.12"},
-        {"Mabury", CTL, NOCTL, 20, 4900, "10.192.131.13"},
-        {"Gilchrist", CTL, NOCTL, 20, 5000, "10.192.131.14"},
-        {"Penitencia_Creek", CTL, NOCTL, 20, 5100, "10.192.131.15"},
-        {"Berryessa", CTL, NOCTL, 20, 5200, "10.192.131.16"},
-        {"Alexander", CTL, NOCTL, 20, 5300, "10.192.131.59"},
+        {"Wilbur_Ave", 2, NOCTL, NOCTL, 0, 4000, "10.192.131.9"},
+        {"Florence_Ave", 2, NOCTL, NOCTL, 0, 4100, "10.192.131.8"},
+        {"Alum_Rock_Ave", 2, NOCTL, NOCTL, 0, 4200, "10.192.131.60"},
+        {"Madden_Ave", 3, CTL, NOCTL, 20, 4300, "10.192.131.7"},
+        {"Gay_Ave", 3, CTL, NOCTL, 20, 4400, "10.192.131.6"},
+        {"McKee_Ave", 3, CTL, NOCTL, 20, 4500, "10.192.131.1"},
+        {"Capitol_Square_Ave", 4, CTL, NOCTL, 20, 4600, "10.192.131.10"},
+        {"Gianotta_Ave", 4, CTL, NOCTL, 20, 4700, "10.192.131.11"},
+        {"Rainfield_Ave", 4, CTL, NOCTL, 20, 4800, "10.192.131.12"},
+        {"Mabury_Ave", 4, CTL, NOCTL, 20, 4900, "10.192.131.13"},
+        {"Gilchrist_Ave", 4, CTL, NOCTL, 20, 5000, "10.192.131.14"},
+        {"Penitencia_Creek_Ave", 4, CTL, NOCTL, 20, 5100, "10.192.131.15"},
+        {"Berryessa_Ave", 4, CTL, NOCTL, 20, 5200, "10.192.131.16"},
+        {"Alexander_Ave", -1, NOCTL, NOCTL, 20, 5300, "10.192.131.59"},
 };
 
 #define NUM_ARTERIAL_CONTROLLERS  sizeof(arterial_desc)/sizeof(arterial_desc_t)
@@ -101,9 +102,11 @@ typedef struct {
 }ramp_meter_desc_t;
 
 ramp_meter_desc_t ramp_meter_desc[] = {
-//        {"Alum_Rock", {0, 1, 2, -1, -1, -1, -1}},
-        {"McKee", {3, 4, 5, -1, -1, -1, -1}},
-        {"Berryessa", {6, 7, 8, 9, 10, 11, 12}},
+        {"Capitol_Ave_Diag_RM", {-1,-1,-1,-1, -1, -1, -1}},
+        {"Alum_Rock_Loop_RM", {-1,-1,-1, -1, -1, -1, -1}},
+        {"Alum_Rock_Diag_RM", {0, 1, 2, -1, -1, -1, -1}},
+        {"McKee_Diag_RM", {3, 4, 5, -1, -1, -1, -1}},
+        {"Berryessa_Diag_RM", {6, 7, 8, 9, 10, 11, 12}},
 };
 
 #define NUM_RAMP_CONTROLLERS    sizeof(ramp_meter_desc)/sizeof(ramp_meter_desc_t)
@@ -119,7 +122,7 @@ int main(int argc, char *argv[])
 	int i, j, k, l;
 	float john_occ_temp;
 	int min_index;
-	db_urms_t urms_ctl[NumOnRamp] = {{0}};//NumOnRamp=5
+	db_urms_t urms_ctl[NumOnRamp] = {{0}};//NumOnRamp=3
 	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status2_t controller_data2[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 	db_urms_status3_t controller_data3[NUM_CONTROLLER_VARS/6];  //See warning at top of file
@@ -137,14 +140,14 @@ int main(int argc, char *argv[])
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
 //	int verbose = 0;
 	agg_data_t mainline_out[NUM_CYCLE_BUFFS][SecSize] =  {{{0}},{{0}}};      // data aggregated section by section
-	agg_data_t onramp_out[NUM_CYCLE_BUFFS][NumOnRamp] = {{{0}},{{0}}};      // data aggregated section by section//NumOnRamp=5
-    agg_data_t onramp_queue_out[NUM_CYCLE_BUFFS][NumOnRamp] = {{{0}},{{0}}};      // data aggregated section by section//NumOnRamp=5
+	agg_data_t onramp_out[NUM_CYCLE_BUFFS][NumOnRamp] = {{{0}},{{0}}};      // data aggregated section by section//NumOnRamp=3
+	agg_data_t onramp_queue_out[NUM_CYCLE_BUFFS][NumOnRamp] = {{{0}},{{0}}};      // data aggregated section by section//NumOnRamp=3
 	agg_data_t offramp_out[NUM_CYCLE_BUFFS][NUM_OFFRAMPS] = {{{0}},{{0}}};  // data aggregated section by section
     
     agg_data_t mainline_out_f[SecSize] = {{0}};        // save filtered data to this array
-	agg_data_t onramp_out_f[NumOnRamp] = {{0}};        // save filtered data to this array//NumOnRamp=5
+	agg_data_t onramp_out_f[NumOnRamp] = {{0}};        // save filtered data to this array//NumOnRamp=3
 	agg_data_t offramp_out_f[NUM_OFFRAMPS] = {{0}};    // save filtered data to this array
-	agg_data_t onramp_queue_out_f[NumOnRamp] = {{0}};  // save filtered data queue detector data to this array//NumOnRamp=5
+	agg_data_t onramp_queue_out_f[NumOnRamp] = {{0}};  // save filtered data queue detector data to this array//NumOnRamp=3
 	 
 	
 	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/6] = {{0}};     // data aggregated controller by controller 
@@ -153,31 +156,31 @@ int main(int argc, char *argv[])
 	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};               // data aggregated controller by controller
 	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};               // this is the register of harmonic mean speed in previous time step
 	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};             // this is the register of mean speed in previous time step
-    float density_prev [NUM_CONTROLLER_VARS/6] = {0};             // this is the register of density in previous time step
+	float density_prev [NUM_CONTROLLER_VARS/6] = {0};             // this is the register of density in previous time step
 	float OR_flow_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp flow in previous time step
 	float OR_occupancy_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp occupancy in previous time step
 	float FR_flow_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp flow in previous time step
 	float FR_occupancy_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp occupancy in previous time step
 	float float_temp;
-    float ML_flow_ratio = 0.0; // current most upstream flow to historical most upstream flow
-    float current_most_upstream_flow = 0.0;
+	float ML_flow_ratio = 0.0; // current most upstream flow to historical most upstream flow
+	float current_most_upstream_flow = 0.0;
 	int debug = 0;
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
 	struct confidence confidence[num_controller_vars][3]; 
 
-    float temp_ary_vol[NUM_CYCLE_BUFFS] = {0};    // temporary array of cyclic buffer
+	float temp_ary_vol[NUM_CYCLE_BUFFS] = {0};    // temporary array of cyclic buffer
 	float temp_ary_speed[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_occ[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_density[NUM_CYCLE_BUFFS] = {0};	
-    float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {0};
+	float temp_ary_OR_vol[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_OR_occ[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_OR_queue_detector_vol[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_OR_queue_detector_occ[NUM_CYCLE_BUFFS] = {0}; 
 	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {0};
-	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0};
+	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0}; 
 	int arterial_desc_index = 0;
 	int do_arterial_control[NUM_RAMP_CONTROLLERS] = {0};
-//NumOnRamp=5
+//NumOnRamp=3
 	//int num_zero_tolerant = 10;
     //int OR_flow_zero_counter[NumOnRamp] = {0};
     //int OR_occ_zero_counter[NumOnRamp] = {0};
@@ -198,7 +201,7 @@ int main(int argc, char *argv[])
 	// Set lane 4 (nonexistent) action
 	// to SKIP and metering rate to 1100 VPH
 	// Set regular lanes 2 & 3 to fixed rate and all plans to 0.
-	for(i=0; i<NumOnRamp; i++) {//NumOnRamp=5
+	for(i=0; i<NumOnRamp; i++) {//NumOnRamp=3
 		urms_ctl[i].lane_1_action = URMS_ACTION_FIXED_RATE;
 		urms_ctl[i].lane_1_plan = 1;
 		urms_ctl[i].lane_2_action = URMS_ACTION_FIXED_RATE;
@@ -302,10 +305,15 @@ int main(int argc, char *argv[])
 	print_timestamp(dbg_st_file_out, pts); // #1 print out current time step to file
  
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
-		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", controller_strings[i], controller_data[i].metered_lane_stat[0].passage_vol, controller_data[i].metered_lane_stat[0].demand_vol, controller_data3[i].additional_det[0].volume);
+		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", 
+			controller_strings[i], 
+			controller_data[i].metered_lane_stat[0].passage_vol, 
+			controller_data[i].metered_lane_stat[0].demand_vol, 
+			controller_data3[i].additional_det[0].volume
+		);
 		
 		// min max function bound the data range and exclude nans.
-        controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 1.0, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
+		controller_mainline_data[i].agg_vol = Mind(12000.0, Maxd( 1.0, flow_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		controller_mainline_data[i].agg_occ = Mind(90.0, Maxd( 1.0, occupancy_aggregation_mainline(&controller_data[i], &confidence[i][0]) ) );
 		 
 		float_temp = hm_speed_aggregation_mainline(&controller_data[i], hm_speed_prev[i], &confidence[i][0]);
@@ -323,63 +331,74 @@ int main(int argc, char *argv[])
 		controller_mainline_data[i].agg_mean_speed = Mind(150.0, Maxd( 1.0, float_temp) );
 
 		if(confidence[i][0].num_total_vals > 0)
-			printf("Confidence for controller %s mainline %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][0].num_good_vals/confidence[i][0].num_total_vals, (float)confidence[i][0].num_total_vals, (float)confidence[i][0].num_good_vals);
+			printf("Confidence for controller %s mainline %f total_vals %f good vals %f\n", 
+				controller_strings[i], 
+				(float)confidence[i][0].num_good_vals/confidence[i][0].num_total_vals, 
+				(float)confidence[i][0].num_total_vals, 
+				(float)confidence[i][0].num_good_vals
+			);
         
-        controller_mainline_data[i].agg_density = Mind(125.0,Maxd( 1.0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol, controller_mainline_data[i].agg_speed, density_prev[i]) ) );
+		controller_mainline_data[i].agg_density = Mind(125.0,Maxd( 1.0,  density_aggregation_mainline(controller_mainline_data[i].agg_vol, controller_mainline_data[i].agg_speed, density_prev[i]) ) );
 		
 		hm_speed_prev[i] = controller_mainline_data[i].agg_speed;
-        mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
-        density_prev[i] = controller_mainline_data[i].agg_density;
+		mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
+		density_prev[i] = controller_mainline_data[i].agg_density;
 
-        //fprintf(dbg_st_file_out,"C%d ", i); //controller index 
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); //2
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); //3,16,29,42,55
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_speed); //4
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_density); //5
-		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_mean_speed);//6
-        //fprintf(dbg_st_file_out,"\n");
+//fprintf(dbg_st_file_out,"C%d ", i); //controller index 
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); //2,14,26,38,50
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); //3,15,27,39,51
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_speed); //4,16,28,40,52
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_density); //5,17,29,41,53
+		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_mean_speed);//6,18,30,42,54
         
 		// assign off-ramp data to array
-        //if(i==OffRampIndex[i]){
 		controller_offramp_data[i].agg_vol =  Mind(6000.0, Maxd( 0, flow_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );
-        controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0, occupancy_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );            
+		controller_offramp_data[i].agg_occ =  Mind(100.0, Maxd( 0, occupancy_aggregation_offramp(&controller_data3[i], &confidence[i][2]) ) );            
 		controller_offramp_data[i].turning_ratio = turning_ratio_offramp(controller_offramp_data[i].agg_vol,controller_mainline_data[i-1].agg_vol);
 		if(confidence[i][2].num_total_vals > 0)
-			printf("Confidence for controller %s offramp %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][2].num_good_vals/confidence[i][2].num_total_vals, (float)confidence[i][2].num_total_vals, (float)confidence[i][2].num_good_vals);
+			printf("Confidence for controller %s offramp %f total_vals %f good vals %f\n", 
+				controller_strings[i], 
+				(float)confidence[i][2].num_good_vals/confidence[i][2].num_total_vals, 
+				(float)confidence[i][2].num_total_vals, 
+				(float)confidence[i][2].num_good_vals
+			);
 		
 		//fprintf(dbg_st_file_out,"FR%d ", i); //controller index 
-        fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_vol); //7
-		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_occ); //8
-		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].turning_ratio);//9
-	    //}
+		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_vol); //7,19,31,43,55
+		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].agg_occ); //8,20,32,44,56
+		fprintf(dbg_st_file_out,"%f ", controller_offramp_data[i].turning_ratio);//9,21,33,45,57
 
-        //fprintf(dbg_st_file_out,"\n");
-        
 		// assign on-ramp data to array
-		//if(i==OnRampIndex[i]){
 		controller_onramp_data[i].agg_vol = Mind(6000.0, Maxd( 0, flow_aggregation_onramp(&controller_data[i], &confidence[i][1]) ) );
 		if(confidence[i][1].num_total_vals > 0)
-			printf("Confidence for controller %s onramp flow %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
-		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
+			printf("Confidence for controller %s onramp flow %f total_vals %f good vals %f\n", 
+				controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, 
+				(float)confidence[i][1].num_total_vals, 
+				(float)confidence[i][1].num_good_vals
+			);
+		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
+
 		// data from on-ramp queue detector
 		controller_onramp_queue_detector_data[i].agg_vol = Mind(6000.0, Maxd( 0, flow_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
-        controller_onramp_queue_detector_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
+		controller_onramp_queue_detector_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
 
 		if(confidence[i][1].num_total_vals > 0)
-			printf("Confidence for controller %s onramp occupancy (queue) %f total_vals %f good vals %f\n", controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, (float)confidence[i][1].num_total_vals, (float)confidence[i][1].num_good_vals);
+			printf("Confidence for controller %s onramp occupancy (queue) %f total_vals %f good vals %f\n",
+				controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, 
+				(float)confidence[i][1].num_total_vals, 
+				(float)confidence[i][1].num_good_vals
+			);
  
 		//fprintf(dbg_st_file_out,"OR%d ", i); //controller index 
-		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); //10
-        fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_occ);//11
-		fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_vol); //12
-        fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_occ);//13
-
-		//}
-		//fprintf(dbg_st_file_out,"\n");
+		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); //10,22,34,46,58
+		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_occ);//11,23,35,47,59
+		fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_vol); //12,24,36,48,60
+		fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_occ);//13,25,37,49,61
 	}
 	fprintf(dbg_st_file_out,"\n");
 
-    
+#define MAX_CONTROLLERS_PER_SECTION	4
+
 // This part aggregate data for each section
 // controller index for each mainline section
 int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1 
@@ -398,7 +417,7 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
  	for(i=0;i<SecSize;i++){
 		// this loop aggregates all controller data in each section
 	
-		for(j=0;j<4;j++){
+		for(j=0;j<MAX_CONTROLLERS_PER_SECTION;j++){
 			if(secCTidx[i][j]>0){
 				temp_vol += controller_mainline_data[secCTidx[i][j]].agg_vol;
 				temp_speed += controller_mainline_data[secCTidx[i][j]].agg_speed; 
@@ -411,7 +430,7 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_speed = Mind(150.0, Maxd(temp_speed/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_occ =  Mind(90.0, Maxd(temp_occ/temp_num_ct,1));
-        mainline_out[cycle_index][i].agg_density = Mind(200.0, Maxd(temp_density/temp_num_ct,1));
+		mainline_out[cycle_index][i].agg_density = Mind(200.0, Maxd(temp_density/temp_num_ct,1));
 
 		/*
 		fprintf(dbg_st_file_out,"S%d,cyc%d ", i,cycle_index); //controller index 
@@ -431,20 +450,19 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 		temp_mean_speed = 0.0;
 
 	} 
-//NumOnRamp=5
+//NumOnRamp=3
 //This part aggregate onramp data for each section
-	int onrampCTidx[NumOnRamp] = {0, 1, 2, 3, 4}; 
+	int onrampCTidx[NumOnRamp] = {2, 3, 4}; 
 	for(i=0;i<NumOnRamp;i++){
 		onramp_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_vol,0));
 		onramp_out[cycle_index][i].agg_occ = Mind(90.0, Maxd(controller_onramp_data[onrampCTidx[i]].agg_occ,0 ));
-        onramp_queue_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd( controller_onramp_queue_detector_data[onrampCTidx[i]].agg_vol ,0));
-		onramp_queue_out[cycle_index][i].agg_occ = Mind(90.0, Maxd(controller_onramp_queue_detector_data[onrampCTidx[i]].agg_occ,0 ));
+		onramp_queue_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd( controller_onramp_queue_detector_data[onrampCTidx[i]].agg_vol ,0));
 	}
-//NumOnRamp=5
+//NumOnRamp=3
 //This part aggregate onramp data for each section <--- match number of off-ramp by number of on-ramp 		 
 	//int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25}; // 4 off-ramp is missing, total number of off-ramps is 9
-	int offrampCTidx[NumOnRamp] = {0, 1, 2, 3, 4}; // 4 off-ramp is missing, total number of off-ramps is 9
-	for(i=0;i<NumOnRamp;i++){ //NumOnRamp=5
+	int offrampCTidx[NumOnRamp] = {2, 3, 4}; // 4 off-ramp is missing, total number of off-ramps is 9
+	for(i=0;i<NumOnRamp;i++){ //NumOnRamp=3
 		if (offrampCTidx[i] != -1.0){//<-- impute data here
 			offramp_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_vol,0));
 			offramp_out[cycle_index][i].agg_occ = Mind(90.0, Maxd(controller_offramp_data[offrampCTidx[i]].agg_occ,0 ));
@@ -538,23 +556,22 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 	   mainline_out_f[i].agg_density = mean_array(temp_ary_density,NUM_CYCLE_BUFFS);
    }
 
- 
 // moving average filter for on-ramp off-ramp
-   for(i=0; i<NumOnRamp; i++){ //NumOnRamp=5
+   for(i=0; i<NumOnRamp; i++){ //NumOnRamp=3
 	  
 	  for(j=0; j<NUM_CYCLE_BUFFS; j++)
 	  {
-	     temp_ary_OR_vol[j] = onramp_out[j][i].agg_vol; 
-		 temp_ary_OR_occ[j] = onramp_out[j][i].agg_occ;   
-		 temp_ary_OR_queue_detector_vol[j] = onramp_queue_out[j][i].agg_vol;
-		 temp_ary_OR_queue_detector_occ[j] = onramp_queue_out[j][i].agg_occ;
-		 temp_ary_FR_vol[j] = offramp_out[j][i].agg_vol;   
-		 temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;
+		temp_ary_OR_vol[j] = onramp_out[j][i].agg_vol; 
+		temp_ary_OR_occ[j] = onramp_out[j][i].agg_occ; 
+		temp_ary_OR_queue_detector_vol[j] = onramp_queue_out[j][i].agg_vol;
+		temp_ary_OR_queue_detector_occ[j] = onramp_queue_out[j][i].agg_occ;
+		temp_ary_FR_vol[j] = offramp_out[j][i].agg_vol;   
+		temp_ary_FR_occ[j] = offramp_out[j][i].agg_occ;
 		
 	  }
 
+	  onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
 	  onramp_queue_out_f[i].agg_vol = mean_array(temp_ary_OR_queue_detector_vol,NUM_CYCLE_BUFFS); 
-	  onramp_queue_out_f[i].agg_occ = mean_array(temp_ary_OR_queue_detector_occ,NUM_CYCLE_BUFFS);
 
 	  // register of on-ramp and off-ramp data in previous time step
 	  OR_flow_prev[i] = onramp_out_f[i].agg_vol;   
@@ -585,31 +602,31 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 			    detection_s[i]->data[Np-1].density=Mind(1200.0, Maxd(mainline_out_f[i].agg_density, 10.0*(1.0+0.5*rand()/RAND_MAX)));
 			    
                 //fprintf(st_file_out,"Sec %d ", i); 
-			    fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_vol); //2,6,10,14,18,22
-                fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 		//3 ,7,11,15,19,23
-				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_occ); //4,8,12,16,20,24
-				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_density); //5,9,13,17,21,25
+			    fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_vol); //2,6,10,14
+                fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_speed); 		//3 ,7,11,15
+				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_occ); //4,8,12,16
+				fprintf(st_file_out,"%.6f ", mainline_out_f[i].agg_density); //5,9,13,17
 
 
 		} 
         
      	//fprintf(st_file_out,"\n");
 
-		for(i=0;i<NumOnRamp;i++) //NumOnRamp=5
+		for(i=0;i<NumOnRamp;i++) //NumOnRamp=3
 		{	
 				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
 				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
 				//fprintf(st_file_out,"OR %d ", i);//
-				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_vol);      //26,32,38,44,50
-				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ);      //27,33,39,45,51
+				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_vol);      //18,24,30
+				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ);      //19,25,31
 				//fprintf(st_file_out,"\n");//
 				//fprintf(st_file_out,"FR %d ", i);//
-				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol);     //28,34,30,46,52
-				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ);     //29,35,31,47,53
-				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_vol);//30,36,32,48,54
-				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_occ);//31,37,33,49,55
+				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol);     //20,26,32
+				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ);     //21,27,33
+				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_vol);//22,28,34
+				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_occ);//23,29,35
 				//fprintf(st_file_out,"\n");//
 				
 				max_occ_2_dwn[i]=detection_s[i]->data[Np-1].occupancy;	
@@ -650,58 +667,43 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 					detection_onramp[i]->data[Np-1].flow=(detection_onramp[i]->data[Np-1].flow)*(1.0-tmp);					
 				}
 		}
-		
 		for (i = 0; i < num_controller_vars; i++) //num_controller_vars=5
 			for (j = 0; j < 4; j++)
-				fprintf(st_file_out,"%d ", controller_data3[i].metering_rate[j]); //56->70
+				fprintf(st_file_out,"%d ", controller_data3[i].metering_rate[j]); //36->50
 		
-		for( i = 0; i < NUM_RAMP_CONTROLLERS; i++) //NUM_RAMP_CONTROLLERS=2
+		for( i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++) //NUM_ARTERIAL_CONTROLLERS=14
 		{
-//			if( do_arterial_control[i] != 0) 							//global control permission
-//			{
-			    for( j = 0; j < MAX_ART_PER_RAMP; j++) //MAX_ART_PER_RAMP=7
-			    { 
-				if( (	(arterial_desc_index = ramp_meter_desc[i].arterial_index[j]) >= 0) &&		//does this ramp meter control this arterial controller? 
-					(arterial_desc[arterial_desc_index].ctl_permission == CTL) )  			//per ramp meter control permission
+			if((arterial_desc[i].ctl_permission == CTL) &&
+				(arterial_desc[i].controlling_rm_index >= 0))
+			
+			{
+//				if((controller_onramp_queue_detector_data[arterial_desc[i].controlling_rm_index].agg_occ > 40) &&
+//				if((controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ > 40) &&
+				if((controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ > 20) &&
+					(arterial_desc[arterial_desc_index].ctl_state != CTL) ) 	//previous state of control was NOCTL
 				{
-					l = 0;
-					john_occ_temp = 0;
-					for(k=0; k<3; k++) {
-						if(controller_data2[i].queue_stat[k][0].stat == 2) {
-							john_occ_temp += 0.1 * ((controller_data2[i].queue_stat[k][0].occ_msb << 8) + controller_data2[i].queue_stat[k][0].occ_lsb); 
-							l++;
-						}
-					}
-					if(l > 0) {
-						john_occ_temp /= l;
-// Original occupancy threshold					if((controller_onramp_queue_detector_data[i].agg_occ > 40) &&		//queue occupancy condition for control 
-						if((john_occ_temp > 40) &&		//queue occupancy condition for control 
-						(arterial_desc[arterial_desc_index].ctl_state != CTL) ) 	//previous state of control was NOCTL
-						{
-							arterial_desc[arterial_desc_index].ctl_state = CTL; 		//set control to CTL
-							if(!debug)							//for debugging control state setting
-								db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
-						}
-						else {
-// Original occupancy threshold					if( (controller_onramp_queue_detector_data[i].agg_occ <= 30) &&
-							if( (john_occ_temp <= 30) &&
-							(arterial_desc[arterial_desc_index].ctl_state == CTL) )  	//previous state of control was CTL
-							{
-								arterial_desc[arterial_desc_index].ctl_state = NOCTL; 	//set control to NOCTL
-								if(!debug)							//for debugging control state setting
-									db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
-							}
-						}
+					arterial_desc[arterial_desc_index].ctl_state = CTL; 		//set control to CTL
+					if(!debug)							//for debugging control state setting
+						db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
+				}
+				else {
+//					if( (controller_onramp_queue_detector_data[arterial_desc[i].controlling_rm_index].agg_occ <= 30) &&
+//					if( (controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ <= 30) &&
+					if( (controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ <= 10) &&
+						(arterial_desc[arterial_desc_index].ctl_state == CTL) )  	//previous state of control was CTL
+					{
+						arterial_desc[arterial_desc_index].ctl_state = NOCTL; 	//set control to NOCTL
+						if(!debug)							//for debugging control state setting
+							db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
 					}
 				}
-				fprintf(st_file_out,"%d %d %d %d %.2f ", 
-						i, 						//71,76,81,86,91,96,101,106,111,116,121,126,131,136,141
-						j, 						//72,77,82,87,92,97,102,107,112,117,122,127,132,137,142
-						arterial_desc_index, 				//73,78,83,88,93,98,103,108,113,118,123,128,133,138,143
-						arterial_desc[arterial_desc_index].ctl_state, 	//74,79,84,89,94,99,104,109,114,119,124,129,134,139,144
-						john_occ_temp); //2*7*5=70			//75,80,85,90,95,100,105,110,115,120,125,130,135,140,145
-			    }
-//			}
+			}
+			fprintf(st_file_out,"%s %s %d %f %d ", 
+				arterial_desc[i].name,									//56,61,66,71,76,81,86,91,96,101,106,111,116,121
+				ramp_meter_desc[arterial_desc[i].controlling_rm_index].name, 				//57,62,67,72,77,82,87,92,97,102,107,112,117,122
+				arterial_desc[i].ctl_permission, 							//58,63,68,73,78,83,88,93,98,103,108,113,118,123
+				controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ, 			//59,64,69,74,79,84,89,94,99,104,109,114,119,124
+				arterial_desc[arterial_desc_index].ctl_state); 						//60,65,70,75,80,85,90,95,100,105,110,115,120,125
 		}
 		for (i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++)
 			print_status(NULL, st_file_out, &arterial_controllers[i], 0);
@@ -1388,7 +1390,7 @@ int set_coef(float c[MP][NP],float Qm)
 
 	sprintf(str,"pre_w:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<NumOnRamp;m++)//NumOnRamp=5
+	for(m=0;m<NumOnRamp;m++)//NumOnRamp=3
 	{
 		fprintf(pp,"%lf ",pre_w[m]);		
 	}
@@ -1396,7 +1398,7 @@ int set_coef(float c[MP][NP],float Qm)
 
 	//sprintf(str,"Q_o:");
 	/*fprintf(pp,"Q_o=:\n");
-	for(m=0;m<NumOnRamp;m++)//NumOnRamp=5
+	for(m=0;m<NumOnRamp;m++)//NumOnRamp=3
 	{
 		fprintf(pp,"%lf ",Q_o[m]);		
 	}
@@ -1405,7 +1407,7 @@ int set_coef(float c[MP][NP],float Qm)
 
 	sprintf(str,"Onramp Length:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<NumOnRamp;m++)//NumOnRamp=5
+	for(m=0;m<NumOnRamp;m++)//NumOnRamp=3
 	{
 		fprintf(pp,"%lf ",onrampL[m]);		
 	}
@@ -1414,7 +1416,7 @@ int set_coef(float c[MP][NP],float Qm)
 	
 	sprintf(str,"dd:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<NumOnRamp;m++)//NumOnRamp=5
+	for(m=0;m<NumOnRamp;m++)//NumOnRamp=3
 	{
 		for(j=0;j<Np;j++)
 		{
@@ -1425,7 +1427,7 @@ int set_coef(float c[MP][NP],float Qm)
 	
 	sprintf(str,"ss:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<NumOnRamp;m++)//NumOnRamp=5
+	for(m=0;m<NumOnRamp;m++)//NumOnRamp=3
 	{
 		for(j=0;j<Np;j++)
 		{
@@ -1460,7 +1462,7 @@ int set_coef(float c[MP][NP],float Qm)
 	
 	sprintf(str,"f:");
 	fprintf(pp,"%s\n",str);
-	for(m=0;m<(NumOnRamp)*Np;m++)//NumOnRamp=5
+	for(m=0;m<(NumOnRamp)*Np;m++)//NumOnRamp=3
 	{
 		fprintf(pp,"%f ",f[m]);		
 	}
@@ -1475,7 +1477,7 @@ int set_coef(float c[MP][NP],float Qm)
 	//}
 	for(i=0;i<10;i++)
 	{
-		for(m=0;m<NumOnRamp;m++)//NumOnRamp=5
+		for(m=0;m<NumOnRamp;m++)//NumOnRamp=3
 			fprintf(pp,"%f ",b_u[NumOnRamp*i+m]);	
 		fprintf(pp,"\n");	
 	}
@@ -1538,12 +1540,12 @@ int opt_metering(void)
 	if (icase == 0)
 	{	
 	
-			for(i=1;i<=NumOnRamp;i++)//NumOnRamp=5
+			for(i=1;i<=NumOnRamp;i++)//NumOnRamp=3
 				{	
 					opt_r[i-1][0]=a[iposv[i+1]][1];							
 					//fprintf(dbg_f,"i=%d, icase=%d iposv=%d, r=%10.2f\n",i,icase, iposv[i],opt_r[i][0]);	
 				}	
-			for(i=NumOnRamp+1;i<=2*NumOnRamp;i++)	//NumOnRamp=5
+			for(i=NumOnRamp+1;i<=2*NumOnRamp;i++)	//NumOnRamp=3
 				{
 					opt_r[i-1-NumOnRamp][1]=a[iposv[i+1]][1];								
 					//fprintf(dbg_f,"i=%d, icase=%d iposv=%d, r=%10.2f\n",i,icase, iposv[i],opt_r[i-1-NumOnRamp][1]);					

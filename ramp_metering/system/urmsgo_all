@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Executing stopurms"
-/home/sj_i680_capitol/ramp_metering/system/stopurms
+echo "Executing stopsystem"
+/home/sj_i680_capitol/ramp_metering/system/stopsystem
 sleep 1
 
 echo "Starting db_slv"
@@ -32,10 +32,10 @@ echo "Starting urmsgo with interval $INTERVAL"
 /home/sj_i680_capitol/ramp_metering/system/urmsgo 166.255.77.235	3800	5000	$TIMESTAMP $INTERVAL
 #sleep 1
 
-cd /home/sj_i680_capitol/ramp_metering/src
-mkdir Out_Data_$TIMESTAMP
-rm Out_Data
-ln -s Out_Data_$TIMESTAMP Out_Data
+#cd /home/sj_i680_capitol/ramp_metering/src
+#mkdir Out_Data_$TIMESTAMP
+#rm Out_Data
+#ln -s Out_Data_$TIMESTAMP Out_Data
 #./lnx/opt_crm -i $INTERVAL >/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
 #Set debugging flag so I can see whether or not the "set plan change" command is being set correctly
 #./lnx/opt_crm -i $INTERVAL -d >/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &

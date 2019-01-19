@@ -19,12 +19,12 @@ MYPATH=`echo $A_FILE | sed '{s/a_10/ &/g}'| awk '{print $1}'`
 TIMESTAMP=`date +%y%m%d_%H%M%S`
 
 echo $MATCHSTR
-echo "Executing stopurms"
-/home/sr99_ramp_metering/system/stopurms
+echo "Executing stopsystem"
+/home/sj_i680_capitol/ramp_metering/system/stopsystem
 sleep 1
 
 echo "Executing stopreplay"
-/home/sr99_ramp_metering/system/stopreplay
+/home/sj_i680_capitol/ramp_metering/system/stopreplay
 sleep 1
 
 echo "Starting db_slv"
@@ -32,7 +32,7 @@ echo "Starting db_slv"
 sleep 1
 
 echo "Starting clt_vars"
-/home/sr99_ramp_metering/src/lnx/clt_vars &
+/home/sj_i680_capitol/ramp_metering/src/lnx/clt_vars &
 sleep 1
 
 y=3000
@@ -41,14 +41,14 @@ do
 	IP_AND_PORT=`echo $THIS_PATH | sed '{s/\// /g}' | awk '{print $NF}'| sed '{s/_/ /g}' | awk '{print $2}'| sed '{s/\./ /5}'`
 	CONTROLLER_IP=`echo $IP_AND_PORT | sed '{s/\./ /4}' | awk '{print $1}'`
 	PORT=`echo $IP_AND_PORT | sed '{s/\./ /4}' | awk '{print $2}'`
-	/home/sr99_ramp_metering/system/replay_controller_go $y $THIS_PATH $INTERVAL
+	/home/sj_i680_capitol/ramp_metering/system/replay_controller_go $y $THIS_PATH $INTERVAL
         echo "Starting wrfiles_rm, $CONTROLLER_IP $y $PORT $TIMESTAMP"
-        /home/sr99_ramp_metering/src/lnx/wrfiles_rm -d /big/data/ac_rm_1 -i $INTERVAL -m 30 -s $y -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP"replay" 1>>/big/data/ac_rm_1/"wrfiles_replay"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+        /home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /linux2/big/data/SANJOSE_ACRM -i $INTERVAL -m 30 -s $y -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP"replay" 1>>/big/data/ac_rm_1/"wrfiles_replay"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
 
 	y=$(($y+200))
 done
 
-cd /home/sr99_ramp_metering/src
+cd /home/sj_i680_capitol/ramp_metering/src
 
 rm Out_Data
 

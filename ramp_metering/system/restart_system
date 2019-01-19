@@ -1,14 +1,32 @@
 #!/bin/bash
 
-if [[ z`ps -ef | grep db_slv | grep -v grep` == 'z' ]]
+INTERVAL=$1
+
+if [[ q$INTERVAL == 'q' ]]
 then
-	echo "Starting urmsgo_all 30000"
-	/home/sj_i680_capitol/ramp_metering/system/urmsgo_all 30000
-	/home/sj_i680_capitol/arterial/system/data_file_2_database.sh
-	exit 1
+	INTERVAL=30000
 fi
 
 TIMESTAMP=`date +%m%Y%d_%H%M%S`
+
+ps -ef | grep db_slv | grep -v grep
+if [[ $? -ne 0 ]]
+then
+	echo "Executing stopsystem"
+	/home/sj_i680_capitol/ramp_metering/system/stopsystem
+	echo "Starting restart_system with interval $INTERVAL ms"
+	echo "Starting urmsgo_all $INTERVAL"
+	/home/sj_i680_capitol/ramp_metering/system/urmsgo_all $INTERVAL
+	/home/sj_i680_capitol/arterial/system/data_file_2_database.sh
+	cd /home/sj_i680_capitol/ramp_metering/src
+	mkdir Out_Data_$TIMESTAMP
+	rm Out_Data
+	ln -s Out_Data_$TIMESTAMP Out_Data
+	echo "Starting opt_crm $INTERVAL"
+	./lnx/opt_crm -i $INTERVAL -d >/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
+	exit 1
+fi
+
 RESTART_LOGFILE=/linux2/big/data/SANJOSE_ACRM/restart_$TIMESTAMP
 
 for x in `cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep urmsgo | grep system | grep -v '^#' | awk '{print $2}'`
@@ -34,7 +52,8 @@ echo CONTROLLER_IP $CONTROLLER_IP PORT $PORT DBNUM $URMS_STATUS_DBNUM >>$RESTART
 	do
 echo PORT11 $PORT INDEX $INDEX >>$RESTART_LOGFILE
 		#Check wrfiles running first
-		if [[ m`ps -ef | grep wrfiles_rm | grep $x | grep -v grep` == 'm' ]]
+		ps -ef | grep wrfiles_rm | grep $x | grep -v grep
+		if [[ $? -ne 0 ]]
 		then 
        		 	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP" >>$RESTART_LOGFILE
 			/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /linux2/big/data/SANJOSE_ACRM -i 30000 -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/linux2/big/data/SANJOSE_ACRM/"wrfiles_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
@@ -44,7 +63,7 @@ echo PORT11 $PORT INDEX $INDEX >>$RESTART_LOGFILE
 echo PORT2 $PORT
 		#Check good data in log file, and kill urms if it's all the same (except for the timestamp)
 # 28 was for sr99		for FILE in `ls -tr /linux2/big/data/SANJOSE_ACRM/*.dat |tail -28 | grep $CONTROLLER_IP | grep $PORT`
-		for FILE in `ls -tr /linux2/big/data/SANJOSE_ACRM/*.dat |tail -50 | grep $CONTROLLER_IP | grep $PORT | tail -1`
+		for FILE in `ls -tr "/linux2/big/data/SANJOSE_ACRM/a_"$CONTROLLER_IP.$PORT*"dat" |tail -50 | grep $CONTROLLER_IP | grep $PORT | tail -1`
 		do
 			NOW=`date +%s`
 			OPEN=`stat $FILE -c %X`
@@ -91,9 +110,13 @@ echo PORT3 $PORT
 	done
 done
 
-if [[ z`ps -ef | grep opt_crm | grep -v grep` == 'z' ]]
+ps -ef | grep opt_crm | grep -v grep | grep -v vi
+if [[ $? -ne 0 ]]
 then
 	cd /home/sj_i680_capitol/ramp_metering/src
+	mkdir Out_Data_$TIMESTAMP
+	rm Out_Data
+	ln -s Out_Data_$TIMESTAMP Out_Data
 	./lnx/opt_crm -i $INTERVAL -d >/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
 #	./lnx/opt_crm -i $INTERVAL >/dev/null &
 fi

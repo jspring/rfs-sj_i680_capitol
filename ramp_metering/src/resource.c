@@ -343,7 +343,8 @@ float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct c
 	return  mind(MAX_OCCUPANCY, occupancy);
 }
 
-float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){ 
+//float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){ 
+float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
 	int i;
 	int j;
 	int k=0;
@@ -399,7 +400,7 @@ float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_st
 	printf("OCCUPANCY_AGGREGATION_ONRAMP: occ_temp ");
 	for(i=0; i<MAX_MAINLINES;i++)
 		printf("%d:%2.2f ",i, occ_temp[i]);
-	printf("num_lane %2.0f mean_occupancy %f var_occupancy %f occupancy %4.2f\n", confidence->num_good_vals, mean_occ, var_occ, occupancy);
+	printf("num_lane %2.0f mean_occupancy %f var_occupancy %f occupancy %4.2f min of 90 and occupancy %4.2f\n", confidence->num_good_vals, mean_occ, var_occ, occupancy, mind(MAX_OCCUPANCY, occupancy));
 	return  mind(MAX_OCCUPANCY, occupancy);
 }
 
@@ -695,10 +696,6 @@ float flow_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_s
 	return mind(MAX_OR_RAMP_FLOW_PER_LANE*num_lane,onramp_demand);
 }
 
-float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
-	float occ_onramp_queue = 0.0;
-   	return occ_onramp_queue;
-}
 
 float queue_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence){
 	float average_vehicle_length = 4.5; // average vehicle length 4.5 meters

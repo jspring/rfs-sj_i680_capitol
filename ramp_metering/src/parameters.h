@@ -12,7 +12,7 @@
 //#define DBG_COEFF
 
 	
-#define NumOnRamp           	5	// the number of onramp; SR99
+#define NumOnRamp           	3	// the number of onramp; SR99
 #define SecSize             	4	// one more than NumOnRam
 #define use_CRM			2	// 1: default; 2: Opt CRM; 3: Coord ALINEA;  4: Hybrid
 

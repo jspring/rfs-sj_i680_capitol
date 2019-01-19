@@ -25,6 +25,7 @@ PATH_LDFLAGS += -L./lnx -L$(ATSC_LIB_DIR)
 EXEC =  $(OBJDIR)/replay_general $(OBJDIR)/wrfiles_rm $(OBJDIR)/clt_vars $(OBJDIR)/opt_crm
 
 all: 	$(OBJDIR) $(PATH_OBJS) $(EXEC)
+	/usr/bin/crontab -l >/home/sj_i680_capitol/ramp_metering/system/crontab.txt
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)

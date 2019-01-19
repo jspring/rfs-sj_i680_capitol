@@ -20,7 +20,12 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-59 23 * * * /home/sr99_ramp_metering/system/stopurms
-*/10 * * * * /home/sr99_ramp_metering/system/restart_system
-0 2 * * * /usr/sbin/ntpdate 10.32.222.3
-0 3 * * * /home/sr99_ramp_metering/system/ssh2pems-2.sh
+58 1 * * * /var/www/html/VSA/scripts/check_vsa_data_feed.sh
+0 2 * * * /home/jspring/bin/remove_yesterdays_VSA_data.sh
+#0 3 * * * /usr/local/bin/kill_vsa
+#* * * * * /home/jspring/bin/check_and_restart_vsa.sh
+#*/15 * * * * /home/jspring/bin/check_and_kill_ntripclient.sh
+#* * * * * /var/www/html/VSA/scripts/safepace_set_speed.php
+#15 19 * * * /home/jspring/bin/run_rtcm3.sh
+59 23 * * * /home/sj_i680_capitol/ramp_metering/system/stopsystem
+*/5 * * * * /home/sj_i680_capitol/ramp_metering/system/restart_system

@@ -54,7 +54,6 @@ extern float flow_aggregation_onramp_queue(db_urms_status_t *controller_data, db
 extern float flow_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence);
 
 extern float occupancy_aggregation_mainline(db_urms_status_t *controller_data, struct confidence *confidence);
-extern float occupancy_aggregation_onramp(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence);
 extern float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_urms_status2_t *controller_data2, struct confidence *confidence);
 extern float occupancy_aggregation_offramp(db_urms_status3_t *controller_data, struct confidence *confidence);
 

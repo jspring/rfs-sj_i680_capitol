@@ -31,5 +31,6 @@ else
 fi
 #sleep 5
 	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP"
-#Changed file time to 3 minutes	/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /linux2/big/data/SANJOSE_ACRM/ -i $INTERVAL -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>"/linux2/big/data/SANJOSE_ACRM/wrfiles_sj_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
-	/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /linux2/big/data/SANJOSE_ACRM/ -i $INTERVAL -m 3 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/linux2/big/data/SANJOSE_ACRM/"wrfiles_sj_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+	/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /linux2/big/data/SANJOSE_ACRM/ -i $INTERVAL -m 30 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>"/linux2/big/data/SANJOSE_ACRM/wrfiles_sj_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
+#Changed file time to 3 minutes	
+#	/home/sj_i680_capitol/ramp_metering/src/lnx/wrfiles_rm -d /linux2/big/data/SANJOSE_ACRM/ -i $INTERVAL -m 3 -s $URMS_STATUS_DBNUM -c $CONTROLLER_IP"."$PORT"."$TIMESTAMP 1>>/linux2/big/data/SANJOSE_ACRM/"wrfiles_sj_ac_rm_"$CONTROLLER_IP"_"$PORT"."$TIMESTAMP".err" 2>&1 &
