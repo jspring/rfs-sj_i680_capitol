@@ -91,7 +91,7 @@ arterial_desc_t arterial_desc[] = {
         {"Gilchrist_Ave", 4, CTL, NOCTL, 20, 5000, "10.192.131.14"},
         {"Penitencia_Creek_Ave", 4, CTL, NOCTL, 20, 5100, "10.192.131.15"},
         {"Berryessa_Ave", 4, CTL, NOCTL, 20, 5200, "10.192.131.16"},
-        {"Alexander_Ave", -1, NOCTL, NOCTL, 20, 5300, "10.192.131.59"},
+        {"Alexander_Ave", 2, NOCTL, NOCTL, 20, 5300, "10.192.131.59"},
 };
 
 #define NUM_ARTERIAL_CONTROLLERS  sizeof(arterial_desc)/sizeof(arterial_desc_t)
@@ -677,33 +677,35 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 				(arterial_desc[i].controlling_rm_index >= 0))
 			
 			{
-//				if((controller_onramp_queue_detector_data[arterial_desc[i].controlling_rm_index].agg_occ > 40) &&
-//				if((controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ > 40) &&
-				if((controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ > 20) &&
-					(arterial_desc[arterial_desc_index].ctl_state != CTL) ) 	//previous state of control was NOCTL
+//				if((controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ > 70) &&
+				if((onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ > 40) && //The -2 comes from the calculation for onramp_out_f, which uses a 0-indexed 
+													   //array with NumOnRamp (==3) members. arterial_desc includes all of the ramp controllers,
+													   //even the 2 controllers that were not in the onramp_out_f calculation.
+					(arterial_desc[i].ctl_state != CTL) ) 	//previous state of control was NOCTL
 				{
-					arterial_desc[arterial_desc_index].ctl_state = CTL; 		//set control to CTL
+					arterial_desc[i].ctl_state = CTL; 		//set control to CTL
 					if(!debug)							//for debugging control state setting
 						db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
 				}
 				else {
-//					if( (controller_onramp_queue_detector_data[arterial_desc[i].controlling_rm_index].agg_occ <= 30) &&
-//					if( (controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ <= 30) &&
-					if( (controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ <= 10) &&
-						(arterial_desc[arterial_desc_index].ctl_state == CTL) )  	//previous state of control was CTL
+//					if( (controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ <= 20) && 
+					if( (onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ <= 30) && //The -2 comes from the calculation for onramp_out_f, which uses a 0-indexed 
+													   //array with NumOnRamp (==3) members. arterial_desc includes all of the ramp controllers,
+													   //even the 2 controllers that were not in the onramp_out_f calculation.
+						(arterial_desc[i].ctl_state == CTL) )  	//previous state of control was CTL
 					{
-						arterial_desc[arterial_desc_index].ctl_state = NOCTL; 	//set control to NOCTL
+						arterial_desc[i].ctl_state = NOCTL; 	//set control to NOCTL
 						if(!debug)							//for debugging control state setting
 							db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
 					}
 				}
 			}
-			fprintf(st_file_out,"%s %s %d %f %d ", 
-				arterial_desc[i].name,									//56,61,66,71,76,81,86,91,96,101,106,111,116,121
-				ramp_meter_desc[arterial_desc[i].controlling_rm_index].name, 				//57,62,67,72,77,82,87,92,97,102,107,112,117,122
-				arterial_desc[i].ctl_permission, 							//58,63,68,73,78,83,88,93,98,103,108,113,118,123
-				controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ, 			//59,64,69,74,79,84,89,94,99,104,109,114,119,124
-				arterial_desc[arterial_desc_index].ctl_state); 						//60,65,70,75,80,85,90,95,100,105,110,115,120,125
+			fprintf(st_file_out,"%s %s %d %.2f %d ", 
+				arterial_desc[i].name,							//56,61,66,71,76,81,86,91,96,101,106,111,116,121
+				ramp_meter_desc[arterial_desc[i].controlling_rm_index].name, 		//57,62,67,72,77,82,87,92,97,102,107,112,117,122
+				arterial_desc[i].ctl_state, 					//58,63,68,73,78,83,88,93,98,103,108,113,118,123
+				onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ, 		//59,64,69,74,79,84,89,94,99,104,109,114,119,124
+				arterial_desc[i].ctl_state); 						//60,65,70,75,80,85,90,95,100,105,110,115,120,125
 		}
 		for (i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++)
 			print_status(NULL, st_file_out, &arterial_controllers[i], 0);

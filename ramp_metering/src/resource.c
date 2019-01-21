@@ -361,7 +361,7 @@ float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_u
 		confidence->num_good_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
 	    for(i=0 ; i < controller_data->num_meter; i++) {
 	   	    for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
- 			    if( (controller_data2->queue_stat[i][j].stat == 2) || (controller_data2->queue_stat[i][j].stat == 1) ){
+ 			    if(controller_data2->queue_stat[i][j].stat == 2){
 				    occupancy = 0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) );
 					if(occupancy>=0 && occupancy<=100){
 					    occ_temp[k] = occupancy;
