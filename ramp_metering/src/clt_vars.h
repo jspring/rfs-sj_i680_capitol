@@ -7,7 +7,7 @@
 #include "data_log.h"
 //#include "wrfiles_rm.h"
 #include "variables2.h"
-#include "rm_algo.h"r
+#include "rm_algo.h"
 #include "ab3418_lib.h"
 #include "ab3418comm.h"
 

@@ -685,7 +685,7 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 				{
 					arterial_desc[i].ctl_state = CTL; 		//set control to CTL
 					if(!debug)							//for debugging control state setting
-						db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
+						db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var+1, sizeof(db_set_pattern_t), &arterial_desc[i].ctl_state); 
 				}
 				else {
 //					if( (controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ <= 20) && 
@@ -696,7 +696,7 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 					{
 						arterial_desc[i].ctl_state = NOCTL; 	//set control to NOCTL
 						if(!debug)							//for debugging control state setting
-							db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var, sizeof(arterial_desc_t), &arterial_desc[arterial_desc_index]); 
+							db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var+1, sizeof(db_set_pattern_t), &arterial_desc[i].ctl_state); 
 					}
 				}
 			}
