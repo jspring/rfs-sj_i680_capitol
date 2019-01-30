@@ -356,12 +356,15 @@ float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_u
 	memset(occ_temp, 0, sizeof(float) * MAX_METERED_LANES * MAX_QUEUE_LOOPS);
 
 
+	printf("OCCUPANCY_AGGREGATION_ONRAMP occ values: ");
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
 		confidence->num_total_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
 		confidence->num_good_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
 	    for(i=0 ; i < controller_data->num_meter; i++) {
 	   	    for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
- 			    if( (controller_data2->queue_stat[i][j].stat == 2) && (controller_data2->queue_stat[i][j].vol > 0) ){
+occupancy=-1;
+// 			    if( (controller_data2->queue_stat[i][j].stat == 2) && (controller_data2->queue_stat[i][j].vol > 0) ){
+ 			    if( (controller_data2->queue_stat[i][j].stat == 2) ){
 				    occupancy = 0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) );
 					if(occupancy>=0 && occupancy<=100){
 					    occ_temp[k] = occupancy;
@@ -372,8 +375,11 @@ float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_u
  			    }else{
  				    confidence->num_good_vals--;
  				}
+printf(" ij %d %d occ %.1f ", i, j, occupancy);
 		}
 	    }
+printf("\n");
+
 	}
 	else
 		return NAN_ERROR;

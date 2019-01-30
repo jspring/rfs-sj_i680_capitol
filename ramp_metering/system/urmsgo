@@ -24,10 +24,10 @@ fi
 if [[ $CONTROL == "control" ]]
 then
 	echo "Starting urms with control"
-	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i $INTERVAL -d $URMS_STATUS_DBNUM -p $PORT >>/linux2/big/data/SANJOSE_ACRM/urmsgo_$TIMESTAMP.err &
+	/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i $INTERVAL -d $URMS_STATUS_DBNUM -p $PORT >>/linux2/big/data/SANJOSE_ACRM/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
 else
 	echo "Starting urms with no control, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $INTERVAL"
-	/home/atsc/urms/lnx/urms -n -r $CONTROLLER_IP -i $INTERVAL -d $URMS_STATUS_DBNUM -p $PORT >/linux2/big/data/SANJOSE_ACRM/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+	/home/atsc/urms/lnx/urms -n -r $CONTROLLER_IP -i $INTERVAL -d $URMS_STATUS_DBNUM -p $PORT >>/linux2/big/data/SANJOSE_ACRM/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
 fi
 #sleep 5
 	echo "Starting wrfiles_rm, $CONTROLLER_IP $URMS_STATUS_DBNUM $PORT $TIMESTAMP"

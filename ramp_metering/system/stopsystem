@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "Stopping db_set_pattern"
+killall db_set_pattern
+sleep 1
+
 echo "Stopping opt_crm"
 killall opt_crm
 sleep 1

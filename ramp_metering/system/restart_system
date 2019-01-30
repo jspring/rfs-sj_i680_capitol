@@ -23,7 +23,7 @@ then
 	rm Out_Data
 	ln -s Out_Data_$TIMESTAMP Out_Data
 	echo "Starting opt_crm $INTERVAL"
-	./lnx/opt_crm -i $INTERVAL -d >/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
+	./lnx/opt_crm -i $INTERVAL -d >>/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
 	exit 1
 fi
 
@@ -37,7 +37,7 @@ do
 	NUM_CONTROLLERS=1
 
 	URMS_STATUS_DBNUM2=`echo $URMS_STATUS_DBNUM | awk '{print $2}'`
-echo CONTROLLER_IP $CONTROLLER_IP PORT $PORT DBNUM $URMS_STATUS_DBNUM >>$RESTART_LOGFILE
+	echo CONTROLLER_IP $CONTROLLER_IP PORT $PORT DBNUM $URMS_STATUS_DBNUM >>$RESTART_LOGFILE
 
 	if [[ q$URMS_STATUS_DBNUM2 != 'q' ]] # Some modems had 2 controllers on their LANs, with different ports assigned
 	then
@@ -50,7 +50,7 @@ echo CONTROLLER_IP $CONTROLLER_IP PORT $PORT DBNUM $URMS_STATUS_DBNUM >>$RESTART
 	for((INDEX=$NUM_CONTROLLERS ; $INDEX>0 ; INDEX=$(($INDEX-1)) ))
 #	for((INDEX=$NUM_CONTROLLERS ; $INDEX>0 ; INDEX-- ))
 	do
-echo PORT11 $PORT INDEX $INDEX >>$RESTART_LOGFILE
+	echo PORT11 $PORT INDEX $INDEX >>$RESTART_LOGFILE
 		#Check wrfiles running first
 		ps -ef | grep wrfiles_rm | grep $x | grep -v grep
 		if [[ $? -ne 0 ]]
@@ -96,10 +96,10 @@ echo PORT3 $PORT
 			cat /home/sj_i680_capitol/ramp_metering/system/urmsgo_all | grep $CONTROLLER_IP | grep control | grep -v '^#'
 			if [[ $? == 0 ]]
 			then			
-				/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/linux2/big/data/SANJOSE_ACRM/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+				/home/atsc/urms/lnx/urms -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >>/linux2/big/data/SANJOSE_ACRM/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
 				CONTROL=under_control
 			else
-				/home/atsc/urms/lnx/urms -n -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >/linux2/big/data/SANJOSE_ACRM/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
+				/home/atsc/urms/lnx/urms -n -r $CONTROLLER_IP -i 30000 -d $URMS_STATUS_DBNUM -p $PORT >>/linux2/big/data/SANJOSE_ACRM/"urms_"$CONTROLLER_IP"."$PORT"."$TIMESTAMP".err" 2>&1 &
 				CONTROL=no_control
 			fi
 			echo CONTROLLER_IP $CONTROLLER_IP URMS_STATUS_DBNUM $URMS_STATUS_DBNUM PORT $PORT $CONTROL >>$RESTART_LOGFILE
@@ -117,6 +117,5 @@ then
 	mkdir Out_Data_$TIMESTAMP
 	rm Out_Data
 	ln -s Out_Data_$TIMESTAMP Out_Data
-	./lnx/opt_crm -i $INTERVAL -d >/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
-#	./lnx/opt_crm -i $INTERVAL >/dev/null &
+	./lnx/opt_crm -i $INTERVAL -d >>/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
 fi

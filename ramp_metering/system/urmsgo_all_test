@@ -18,12 +18,15 @@ TIMESTAMP=`date +%y%m%d_%H%M%S`
 
 echo "Starting urmsgo with interval $INTERVAL control $CONTROL"
 
-/home/sj_i680_capitol/ramp_metering/system/urmsgo 10.29.248.67	3600	1000	$TIMESTAMP $INTERVAL control
+/home/sj_i680_capitol/ramp_metering/system/urmsgo 10.192.131.125 3800 1000 $TIMESTAMP $INTERVAL control
 sleep 1
-/home/sj_i680_capitol/ramp_metering/system/urmsgo 10.29.248.81	3800	1000	$TIMESTAMP $INTERVAL control
-sleep 1
+#/home/sj_i680_capitol/ramp_metering/system/urmsgo 10.29.248.81	3800	1000	$TIMESTAMP $INTERVAL control
+#sleep 1
 
 cd /home/sj_i680_capitol/ramp_metering/src
 mkdir Out_Data_$TIMESTAMP
 ln -s Out_Data_$TIMESTAMP Out_Data
 ./lnx/opt_crm -i $INTERVAL >/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
+sleep 1
+#./lnx/db_set_pattern >/linux2/big/data/SANJOSE_ACRM/db_set_pattern_$TIMESTAMP.txt &
+./lnx/db_set_pattern

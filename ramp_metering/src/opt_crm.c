@@ -66,6 +66,7 @@ const char *controller_strings[] = {
 #define NOCTL   		0
 #define CTL     		1
 #define MAX_ART_PER_RAMP	7
+#define FREE_PATTERN		255
 
 typedef struct {
         char *name;
@@ -128,6 +129,7 @@ int main(int argc, char *argv[])
 	db_urms_status3_t controller_data3[NUM_CONTROLLER_VARS/6];  //See warning at top of file
 
 	get_long_status8_resp_mess_typ arterial_controllers[NUM_ARTERIAL_CONTROLLERS]; //arterial controllers
+	db_set_pattern_t  db_set_pattern[NUM_ARTERIAL_CONTROLLERS];
 
 	int option;
 	int exitsig;
@@ -212,6 +214,10 @@ int main(int argc, char *argv[])
 		urms_ctl[i].lane_4_release_rate = 1100;
 		urms_ctl[i].lane_4_plan = 1;
 	}
+
+	for(i=0; i<NUM_ARTERIAL_CONTROLLERS; i++)
+		db_set_pattern[i].pattern = FREE_PATTERN;
+	
 
 	while ((option = getopt(argc, argv, "di:r")) != EOF) {
 		switch(option) {
@@ -379,9 +385,9 @@ int main(int argc, char *argv[])
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
 
 		// data from on-ramp queue detector
-		controller_onramp_queue_detector_data[i].agg_vol = Mind(6000.0, Maxd( 0, flow_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
-		controller_onramp_queue_detector_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
-
+//		controller_onramp_queue_detector_data[i].agg_vol = Mind(6000.0, Maxd( 0, flow_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
+//		controller_onramp_queue_detector_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
+printf("controller_data2[%d].queue_stat[0][0].occ_msb %hhu controller_data2[%d].queue_stat[0][0].occ_lsb %hhu\n", i, controller_data2[i].queue_stat[0][0].occ_msb, i, controller_data2[i].queue_stat[0][0].occ_lsb);
 		if(confidence[i][1].num_total_vals > 0)
 			printf("Confidence for controller %s onramp occupancy (queue) %f total_vals %f good vals %f\n",
 				controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, 
@@ -677,26 +683,30 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 				(arterial_desc[i].controlling_rm_index >= 0))
 			
 			{
-//				if((controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ > 70) &&
 				if((onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ > 40) && //The -2 comes from the calculation for onramp_out_f, which uses a 0-indexed 
 													   //array with NumOnRamp (==3) members. arterial_desc includes all of the ramp controllers,
 													   //even the 2 controllers that were not in the onramp_out_f calculation.
 					(arterial_desc[i].ctl_state != CTL) ) 	//previous state of control was NOCTL
 				{
 					arterial_desc[i].ctl_state = CTL; 		//set control to CTL
+					db_set_pattern[i].pattern = arterial_desc[i].pattern;
+					db_set_pattern[i].pattern = 20;
 					if(!debug)							//for debugging control state setting
-						db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var+1, sizeof(db_set_pattern_t), &arterial_desc[i].ctl_state); 
+						db_clt_write(pclt, arterial_desc[i].db_var+1, sizeof(db_set_pattern_t), &db_set_pattern[i].pattern); 
+printf("HIGH!!!!\n");
 				}
 				else {
-//					if( (controller_onramp_data[arterial_desc[i].controlling_rm_index].agg_occ <= 20) && 
 					if( (onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ <= 30) && //The -2 comes from the calculation for onramp_out_f, which uses a 0-indexed 
 													   //array with NumOnRamp (==3) members. arterial_desc includes all of the ramp controllers,
 													   //even the 2 controllers that were not in the onramp_out_f calculation.
 						(arterial_desc[i].ctl_state == CTL) )  	//previous state of control was CTL
 					{
 						arterial_desc[i].ctl_state = NOCTL; 	//set control to NOCTL
+						db_set_pattern[i].pattern = FREE_PATTERN;
+						db_set_pattern[i].pattern = 255;
 						if(!debug)							//for debugging control state setting
-							db_clt_write(pclt, arterial_desc[arterial_desc_index].db_var+1, sizeof(db_set_pattern_t), &arterial_desc[i].ctl_state); 
+							db_clt_write(pclt, arterial_desc[i].db_var+1, sizeof(db_set_pattern_t), &db_set_pattern[i].pattern); 
+printf("LOW!!!!\n");
 					}
 				}
 			}
@@ -705,7 +715,7 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 				ramp_meter_desc[arterial_desc[i].controlling_rm_index].name, 		//57,62,67,72,77,82,87,92,97,102,107,112,117,122
 				arterial_desc[i].ctl_state, 					//58,63,68,73,78,83,88,93,98,103,108,113,118,123
 				onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ, 		//59,64,69,74,79,84,89,94,99,104,109,114,119,124
-				arterial_desc[i].ctl_state); 						//60,65,70,75,80,85,90,95,100,105,110,115,120,125
+				db_set_pattern[i].pattern); 						//60,65,70,75,80,85,90,95,100,105,110,115,120,125
 		}
 		for (i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++)
 			print_status(NULL, st_file_out, &arterial_controllers[i], 0);

@@ -24,7 +24,7 @@ const char *controller_strings[] =  {
 	"10.192.131.14", 
 	"10.192.131.15", 
 	"10.192.131.16", 
-	"10.192.131.59" 
+	"10.192.131.59", 
 };
 
 int db_arterial_trig_list[] =  {
@@ -59,26 +59,31 @@ int main(int argc, char *argv[]) {
 	int i;
 	trig_info_typ trig_info;
 
-	char *str1 = "ssh -p 5571 jspring@localhost \"/home/atsc/ab3418/lnx/ab3418comm -A 192.168.200.120 -o 162 -P \"";
-	char *str2 = " -v | grep \"checksum OK\""; 
+	char *str1 = "ssh -p 5571 jspring@localhost \"/home/atsc/ab3418/lnx/ab3418comm -A 192.168.200.120 -f blah -o 162 -P \"";
+	char *str2 = " -v | grep \"checksum OK\" & "; 
 	char whole_shebang[200] = {0};
-
 #ifdef DEBUG
 
-	str1 = "/home/atsc/ab3418/lnx/ab3418comm -A 10.192.131.150 -o 162 -P ";
+	str1 = "/home/atsc/ab3418/lnx/ab3418comm -A 10.192.131.150 -f blah -o 162 -P ";
 #endif	
         get_local_name(hostname, MAXHOSTNAMELEN);
         if ( (pclt = db_list_init(argv[0], hostname, domain, xport, NULL, 0, db_arterial_trig_list, NUM_ARTERIAL_TRIG_VARS)) == NULL) {
             exit(EXIT_FAILURE);
         }
 
+	printf("db_set_pattern: strings to be sent to Linux system command are:\n");
+	for(i=0; i<NUM_ARTERIAL_TRIG_VARS; i++) {
+		db_clt_read(pclt, db_arterial_trig_list[i], sizeof(db_set_pattern_t), &db_set_pattern);
+		printf("%s %hhu -a %s %s \n ", str1, db_set_pattern.pattern, controller_strings[i], str2);
+	}
 	while(1) {
 
 		retval = clt_ipc_receive(pclt, &trig_info, sizeof(trig_info));
 		for(i=0; i<NUM_ARTERIAL_TRIG_VARS; i++) {
 		       	if( DB_TRIG_VAR(&trig_info) == db_arterial_trig_list[i]) {
 				memset(whole_shebang, 0, sizeof(whole_shebang));
-				sprintf(whole_shebang, "%s %hhu -a %s %s \n ", str1, db_set_pattern.pattern, controller_strings[i], str2);
+				sprintf(whole_shebang, "%s %d -a %s %s \n ", str1, db_set_pattern.pattern, controller_strings[i], str2);
+				printf("db_set_pattern: string sent to Linux system command is:\n%s\n", whole_shebang);
 				db_clt_read(pclt, db_arterial_trig_list[i], sizeof(db_set_pattern_t), &db_set_pattern);
 				retval = system(whole_shebang);
 				if(retval == 0) 
@@ -90,3 +95,33 @@ int main(int argc, char *argv[]) {
 	}
 	return 0;
 }
+
+
+/* Now wait for a trigger. 
+            recv_type= clt_ipc_receive(pclt, &trig_info, sizeof(trig_info));
+
+            if (recv_type == DB_TIMER)
+                {
+                printf("received timer alarm\n");
+
+                }
+            else if(DB_TRIG_VAR(&trig_info) ==  DB_DII_OUT_VAR )
+                {
+                fflush(stdout);
+                 Read DB_DII_OUT_VAR and send DII control
+                 to the hardware. 
+                if( clt_read( pclt, DB_DII_OUT_VAR, DB_DII_OUT_TYPE,
+                    &db_data ) == FALSE )
+                    {
+                    fprintf( stderr, "clt_read( DB_DII_OUT_VAR ).\n" );
+                    }
+                else
+                    {
+                    pdii_out = (dii_out_typ *) db_data.value.user;
+                    printf("dii_out flag change %d\n", pdii_out->dii_flag);
+                    }
+                }
+
+            else
+                printf("Unknown trigger, recv_type %d\n", recv_type);
+*/
