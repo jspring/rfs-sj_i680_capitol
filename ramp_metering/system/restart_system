@@ -23,7 +23,9 @@ then
 	rm Out_Data
 	ln -s Out_Data_$TIMESTAMP Out_Data
 	echo "Starting opt_crm $INTERVAL"
-	./lnx/opt_crm -i $INTERVAL -d >>/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
+#	./lnx/opt_crm -i $INTERVAL -d >>/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
+	./lnx/opt_crm -i $INTERVAL >>/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
+	./lnx/db_set_pattern >>/linux2/big/data/SANJOSE_ACRM/db_set_pattern_$TIMESTAMP.txt &
 	exit 1
 fi
 
@@ -117,5 +119,6 @@ then
 	mkdir Out_Data_$TIMESTAMP
 	rm Out_Data
 	ln -s Out_Data_$TIMESTAMP Out_Data
-	./lnx/opt_crm -i $INTERVAL -d >>/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
+#	./lnx/opt_crm -i $INTERVAL -d >>/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
+	./lnx/opt_crm -i $INTERVAL >>/linux2/big/data/SANJOSE_ACRM/opt_crm_$TIMESTAMP.txt &
 fi

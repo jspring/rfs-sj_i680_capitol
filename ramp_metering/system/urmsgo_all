@@ -18,19 +18,19 @@ INTERVAL=$1
 echo "Starting urmsgo with interval $INTERVAL"
 
 /home/sj_i680_capitol/ramp_metering/system/urmsgo 166.253.101.113	3000	5000	$TIMESTAMP $INTERVAL
-#sleep 1
+sleep 12
 #/home/sj_i680_capitol/ramp_metering/system/urmsgo 166.253.101.111	3200	5000	$TIMESTAMP $INTERVAL control NO CONTROL UNTIL NECESSARY!!!!
 /home/sj_i680_capitol/ramp_metering/system/urmsgo 166.253.101.111	3200	5000	$TIMESTAMP $INTERVAL
-#sleep 1
+sleep 12
 #/home/sj_i680_capitol/ramp_metering/system/urmsgo 166.255.77.236	3400	5000	$TIMESTAMP $INTERVAL control NO CONTROL UNTIL NECESSARY!!!!
 /home/sj_i680_capitol/ramp_metering/system/urmsgo 166.255.77.236	3400	5000	$TIMESTAMP $INTERVAL
-#sleep 1
+sleep 12
 /home/sj_i680_capitol/ramp_metering/system/urmsgo 166.253.101.112	3600	5000	$TIMESTAMP $INTERVAL
 #/home/sj_i680_capitol/ramp_metering/system/urmsgo 166.253.101.112	3600	5000	$TIMESTAMP $INTERVAL control NO CONTROL UNTIL NECESSARY!!!!
-#sleep 1
+sleep 12
 #/home/sj_i680_capitol/ramp_metering/system/urmsgo 166.255.77.235	3800	5000	$TIMESTAMP $INTERVAL control NO CONTROL UNTIL NECESSARY!!!!
 /home/sj_i680_capitol/ramp_metering/system/urmsgo 166.255.77.235	3800	5000	$TIMESTAMP $INTERVAL
-#sleep 1
+sleep 12
 
 #cd /home/sj_i680_capitol/ramp_metering/src
 #mkdir Out_Data_$TIMESTAMP
