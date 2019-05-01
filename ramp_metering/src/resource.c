@@ -355,15 +355,20 @@ float occupancy_aggregation_onramp_queue(db_urms_status_t *controller_data, db_u
 
 	memset(occ_temp, 0, sizeof(float) * MAX_METERED_LANES * MAX_QUEUE_LOOPS);
 
+	controller_data->num_meter = 1; //############ THIS IS A FIX APPLICABLE TO SAN JOSE ONLY!!!!!!! #### REMOVE IT FOR ALL OTHER USES OF THIS CODE!!!! ####
+					//############ THIS IS A FIX APPLICABLE TO SAN JOSE ONLY!!!!!!! #### REMOVE IT FOR ALL OTHER USES OF THIS CODE!!!! ####
+					//############ THIS IS A FIX APPLICABLE TO SAN JOSE ONLY!!!!!!! #### REMOVE IT FOR ALL OTHER USES OF THIS CODE!!!! ####
+					//############ THIS IS A FIX APPLICABLE TO SAN JOSE ONLY!!!!!!! #### REMOVE IT FOR ALL OTHER USES OF THIS CODE!!!! ####
 
 	printf("OCCUPANCY_AGGREGATION_ONRAMP occ values: ");
 	if( (controller_data->num_meter > 0) && (controller_data->num_meter <= 4) ) {
-		confidence->num_total_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
-		confidence->num_good_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
+//		confidence->num_total_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
+//		confidence->num_good_vals = controller_data->num_meter * MAX_QUEUE_LOOPS;
+		confidence->num_total_vals = 1; //############ THIS IS A FIX APPLICABLE TO SAN JOSE ONLY!!!!!!! #### REMOVE IT FOR ALL OTHER USES OF THIS CODE!!!! ####
+		confidence->num_good_vals = 1; //############ THIS IS A FIX APPLICABLE TO SAN JOSE ONLY!!!!!!! #### REMOVE IT FOR ALL OTHER USES OF THIS CODE!!!! ####
 	    for(i=0 ; i < controller_data->num_meter; i++) {
-	   	    for(j=0 ; j < MAX_QUEUE_LOOPS; j++) { 
-occupancy=-1;
-// 			    if( (controller_data2->queue_stat[i][j].stat == 2) && (controller_data2->queue_stat[i][j].vol > 0) ){
+//	   	    for(j=0 ; j < MAX_QUEUE_LOOPS; j++) 
+	   	    for(j=0 ; j < 1; j++) { //############ THIS IS A FIX APPLICABLE TO SAN JOSE ONLY!!!!!!! #### REMOVE IT FOR ALL OTHER USES OF THIS CODE!!!! ####
  			    if( (controller_data2->queue_stat[i][j].stat == 2) ){
 				    occupancy = 0.1 * ( ((controller_data2->queue_stat[i][j].occ_msb << 8) & 0xFF00) + ((controller_data2->queue_stat[i][j].occ_lsb) & 0xFF) );
 					if(occupancy>=0 && occupancy<=100){
@@ -996,7 +1001,7 @@ float ratio_ML_HIS_FLOW(float current_most_upstream_flow, const float MOST_UPSTR
 
 	int t_0 = 0;
 	float t_convert = 0.0; 
-	float ML_flow = 0.0;
+//	float ML_flow = 0.0;
 	float ratio = 0.0;
 
 	t_convert = (12*ts->hour) + (ts->min/5.0) + (ts->sec/300.0) ;
@@ -1007,7 +1012,7 @@ float ratio_ML_HIS_FLOW(float current_most_upstream_flow, const float MOST_UPSTR
 	t_0 = mind(t_0,288);
 	t_0 = maxd(0,t_0);
 	 
-	ML_flow = MOST_UPSTREAM_MAINLINE_FLOW_DATA[t_0][1]*12; 
+//	ML_flow = MOST_UPSTREAM_MAINLINE_FLOW_DATA[t_0][1]*12; 
 	
 	// flow change rate limiter 
 	//if( abs(current_most_upstream_flow-ML_flow) > 0 ){
