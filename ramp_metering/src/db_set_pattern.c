@@ -95,33 +95,3 @@ int main(int argc, char *argv[]) {
 	}
 	return 0;
 }
-
-
-/* Now wait for a trigger. 
-            recv_type= clt_ipc_receive(pclt, &trig_info, sizeof(trig_info));
-
-            if (recv_type == DB_TIMER)
-                {
-                printf("received timer alarm\n");
-
-                }
-            else if(DB_TRIG_VAR(&trig_info) ==  DB_DII_OUT_VAR )
-                {
-                fflush(stdout);
-                 Read DB_DII_OUT_VAR and send DII control
-                 to the hardware. 
-                if( clt_read( pclt, DB_DII_OUT_VAR, DB_DII_OUT_TYPE,
-                    &db_data ) == FALSE )
-                    {
-                    fprintf( stderr, "clt_read( DB_DII_OUT_VAR ).\n" );
-                    }
-                else
-                    {
-                    pdii_out = (dii_out_typ *) db_data.value.user;
-                    printf("dii_out flag change %d\n", pdii_out->dii_flag);
-                    }
-                }
-
-            else
-                printf("Unknown trigger, recv_type %d\n", recv_type);
-*/
