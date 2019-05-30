@@ -46,7 +46,7 @@ int db_arterial_trig_list[] =  {
 
 int NUM_ARTERIAL_TRIG_VARS = sizeof(db_arterial_trig_list)/sizeof(int);
 
-#define DEBUG
+#undef DEBUG
 
 int main(int argc, char *argv[]) {
 
@@ -59,9 +59,13 @@ int main(int argc, char *argv[]) {
 	int i;
 	trig_info_typ trig_info;
 
-	char *str1 = "ssh -p 5571 jspring@localhost \"/home/atsc/ab3418/lnx/ab3418comm -A 192.168.200.120 -f blah -o 162 -P \"";
-	char *str2 = " -v | grep \"checksum OK\" & "; 
+	char *str1 = "ssh -p 5571 jspring@localhost \"/home/atsc/ab3418/lnx/ab3418comm -A 192.168.200.120 -f blah -o 162 -P ";
+	char *str2 = " -v | grep \"checksum OK\" & \" "; 
+	char *str3 = "ssh -p 5571 jspring@localhost \"/home/atsc/ab3418/lnx/ab3418comm -A 192.168.200.120 -f blah -o 162 -E ";
+	char *str4 = " -v & \" "; 
 	char whole_shebang[200] = {0};
+	char whole_shebang2[200] = {0};
+	timestamp_t ts;
 #ifdef DEBUG
 
 	str1 = "/home/atsc/ab3418/lnx/ab3418comm -A 10.192.131.150 -f blah -o 162 -P ";
@@ -71,25 +75,44 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
-	printf("db_set_pattern: strings to be sent to Linux system command are:\n");
+	get_current_timestamp(&ts);
+	printf("db_set_pattern: ");
+	print_timestamp(stdout, &ts);
+	printf(" strings to be sent to Linux system command are:\n");
 	for(i=0; i<NUM_ARTERIAL_TRIG_VARS; i++) {
+		memset(whole_shebang, 0, sizeof(whole_shebang));
 		db_clt_read(pclt, db_arterial_trig_list[i], sizeof(db_set_pattern_t), &db_set_pattern);
-		printf("%s %hhu -a %s %s \n ", str1, db_set_pattern.pattern, controller_strings[i], str2);
+		sprintf(whole_shebang, "%s %d -a %s %s \n ", str1, db_set_pattern.pattern, controller_strings[i], str2);
+		printf("%s", whole_shebang);
 	}
+	fflush(NULL);
 	while(1) {
 
 		retval = clt_ipc_receive(pclt, &trig_info, sizeof(trig_info));
 		for(i=0; i<NUM_ARTERIAL_TRIG_VARS; i++) {
 		       	if( DB_TRIG_VAR(&trig_info) == db_arterial_trig_list[i]) {
+				get_current_timestamp(&ts);
 				memset(whole_shebang, 0, sizeof(whole_shebang));
-				sprintf(whole_shebang, "%s %d -a %s %s \n ", str1, db_set_pattern.pattern, controller_strings[i], str2);
-				printf("db_set_pattern: string sent to Linux system command is:\n%s\n", whole_shebang);
 				db_clt_read(pclt, db_arterial_trig_list[i], sizeof(db_set_pattern_t), &db_set_pattern);
+				sprintf(whole_shebang, "%s %d -a %s %s \n ", str1, db_set_pattern.pattern, controller_strings[i], str2);
+				printf("\n\n\ndb_set_pattern: ");
+				print_timestamp(stdout, &ts);
+				printf(" control string sent to Linux system command is:\n%s", whole_shebang);
 				retval = system(whole_shebang);
 				if(retval == 0) 
 					printf("set_pattern returned OK: db_var %d val %d\n", db_arterial_trig_list[i], db_set_pattern.pattern);
 				else
 					printf("set_pattern did not return OK: db_var %d val %d\n", db_arterial_trig_list[i], db_set_pattern.pattern);
+				sleep(1);
+				memset(whole_shebang2, 0, sizeof(whole_shebang2));
+				sprintf(whole_shebang2, "%s -a %s %s \n ", str3, controller_strings[i], str4);
+				printf(" poll string sent to Linux system command is:\n%s", whole_shebang2);
+				retval = system(whole_shebang2);
+				if(retval == 0) 
+					printf("get_status returned OK: db_var %d\n", db_arterial_trig_list[i]);
+				else
+					printf("get_status did not return OK: db_var %d\n", db_arterial_trig_list[i]);
+				fflush(NULL);
 			}
 		}
 	}
