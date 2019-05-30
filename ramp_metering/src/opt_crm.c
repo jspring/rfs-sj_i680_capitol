@@ -67,6 +67,7 @@ const char *controller_strings[] = {
 #define CTL     		1
 #define MAX_ART_PER_RAMP	7
 #define FREE_PATTERN		255
+#define CTL_INTRVL_MS		119000
 
 typedef struct {
         char *name;
@@ -76,25 +77,23 @@ typedef struct {
         unsigned char pattern;
 	int db_var;
 	char *ipaddr;
-	unsigned char SJ_pattern_7_to_9;
-	unsigned char SJ_pattern_9_to_16;
 } arterial_desc_t;
 
 arterial_desc_t arterial_desc[] = {
-        {"Wilbur_Ave", 2, NOCTL, NOCTL, 0, 4000, "10.192.131.9", 255, 255},		//07:00; 255->255 09:00; 255->255 16:00: 255->255
-        {"Florence_Ave", 2, NOCTL, NOCTL, 0, 4100, "10.192.131.8", 255, 4},		//07:00; 255->255 09:00; 255->004 16:00: 004->255
-        {"Alum_Rock_Ave", 2, NOCTL, NOCTL, 0, 4200, "10.192.131.60", 1, 2},		//07:00; 002->001 09:00; 255->002 16:00: 002->003
-        {"Madden_Ave", 3, CTL, NOCTL, 9, 4300, "10.192.131.7", 255, 255},		//07:00; 255->255 09:00; 255->255 16:00: 255->255
-        {"Gay_Ave", 3, CTL, NOCTL, 9, 4400, "10.192.131.6", 255, 255},			//07:00; 255->255 09:00; 255->255 16:00: 255->255
-        {"McKee_Ave", 3, CTL, NOCTL, 9, 4500, "10.192.131.1", 1, 4},			//07:00; 255->001 09:00; 255->004 16:00: 004->003
-        {"Capitol_Square_Ave", 4, CTL, NOCTL, 9, 4600, "10.192.131.10", 255, 4},	//07:00; 255->255 09:00; 255->004 16:00: 004->255
-        {"Gianotta_Ave", 4, CTL, NOCTL, 9, 4700, "10.192.131.11", 255, 255},		//07:00; 255->255 09:00; 255->255 16:00: 255->255
-        {"Rainfield_Ave", 4, CTL, NOCTL, 9, 4800, "10.192.131.12", 255, 255},		//07:00; 255->255 09:00; 255->255 16:00: 255->255
-        {"Mabury_Ave", 4, CTL, NOCTL, 9, 4900, "10.192.131.13", 255, 255},		//07:00; 255->255 09:00; 255->255 16:00: 255->255
-        {"Gilchrist_Ave", 4, CTL, NOCTL, 9, 5000, "10.192.131.14", 255, 255},		//07:00; 255->255 09:00; 255->255 16:00: 255->003
-        {"Penitencia_Creek_Ave", 4, CTL, NOCTL, 9, 5100, "10.192.131.15", 255, 255},	//07:00; 255->255 09:00; 255->255 16:00: 255->003
-        {"Berryessa_Ave", 4, CTL, NOCTL, 9, 5200, "10.192.131.16", 2, 2},		//07:00; 002->002 09:00; 255->002 16:00: 002->002
-        {"Alexander_Ave", 2, NOCTL, NOCTL, 9, 5300, "10.192.131.59", 1, 4},		//07:00; 255->001 09:00; 255->004 16:00: 002->002
+        {"Wilbur_Ave", 2, NOCTL, NOCTL, 0, 4000, "10.192.131.9"},		//07:00; 255->255 09:00; 255->255 16:00: 255->255
+        {"Florence_Ave", 2, NOCTL, NOCTL, 0, 4100, "10.192.131.8"},		//07:00; 255->255 09:00; 255->004 16:00: 004->255
+        {"Alum_Rock_Ave", 2, NOCTL, NOCTL, 0, 4200, "10.192.131.60"},		//07:00; 002->001 09:00; 255->002 16:00: 002->003
+        {"Madden_Ave", 3, CTL, NOCTL, 9, 4300, "10.192.131.7"},			//07:00; 255->255 09:00; 255->255 16:00: 255->255
+        {"Gay_Ave", 3, CTL, NOCTL, 9, 4400, "10.192.131.6"},			//07:00; 255->255 09:00; 255->255 16:00: 255->255
+        {"McKee_Ave", 3, CTL, NOCTL, 9, 4500, "10.192.131.1"},			//07:00; 255->001 09:00; 255->004 16:00: 004->003
+        {"Capitol_Square_Ave", 4, CTL, NOCTL, 9, 4600, "10.192.131.10"},	//07:00; 255->255 09:00; 255->004 16:00: 004->255
+        {"Gianotta_Ave", 4, CTL, NOCTL, 9, 4700, "10.192.131.11"},		//07:00; 255->255 09:00; 255->255 16:00: 255->255
+        {"Rainfield_Ave", 4, CTL, NOCTL, 9, 4800, "10.192.131.12"},		//07:00; 255->255 09:00; 255->255 16:00: 255->255
+        {"Mabury_Ave", 4, CTL, NOCTL, 9, 4900, "10.192.131.13"},		//07:00; 255->255 09:00; 255->255 16:00: 255->255
+        {"Gilchrist_Ave", 4, CTL, NOCTL, 9, 5000, "10.192.131.14"},		//07:00; 255->255 09:00; 255->255 16:00: 255->003
+        {"Penitencia_Creek_Ave", 4, CTL, NOCTL, 9, 5100, "10.192.131.15"},	//07:00; 255->255 09:00; 255->255 16:00: 255->003
+        {"Berryessa_Ave", 4, CTL, NOCTL, 9, 5200, "10.192.131.16"},		//07:00; 002->002 09:00; 255->002 16:00: 002->002
+        {"Alexander_Ave", 2, NOCTL, NOCTL, 9, 5300, "10.192.131.59"},		//07:00; 255->001 09:00; 255->004 16:00: 002->002
 };
 
 #define NUM_ARTERIAL_CONTROLLERS  sizeof(arterial_desc)/sizeof(arterial_desc_t)
@@ -102,14 +101,15 @@ arterial_desc_t arterial_desc[] = {
 typedef struct {
         char *name;
         int arterial_index[7];
+	int inter_threshold_flag;
 }ramp_meter_desc_t;
 
 ramp_meter_desc_t ramp_meter_desc[] = {
-        {"Capitol_Ave_Diag_RM", {-1,-1,-1,-1, -1, -1, -1}},
-        {"Alum_Rock_Loop_RM", {-1,-1,-1, -1, -1, -1, -1}},
-        {"Alum_Rock_Diag_RM", {0, 1, 2, -1, -1, -1, -1}},
-        {"McKee_Diag_RM", {3, 4, 5, -1, -1, -1, -1}},
-        {"Berryessa_Diag_RM", {6, 7, 8, 9, 10, 11, 12}},
+        {"Capitol_Ave_Diag_RM", {-1,-1,-1,-1, -1, -1, -1}, -1},
+        {"Alum_Rock_Loop_RM", {-1,-1,-1, -1, -1, -1, -1}, -1},
+        {"Alum_Rock_Diag_RM", {0, 1, 2, -1, -1, -1, -1}, -1},
+        {"McKee_Diag_RM", {3, 4, 5, -1, -1, -1, -1}, -1},
+        {"Berryessa_Diag_RM", {6, 7, 8, 9, 10, 11, 12}, -1},
 };
 
 #define NUM_RAMP_CONTROLLERS    sizeof(ramp_meter_desc)/sizeof(ramp_meter_desc_t)
@@ -133,8 +133,6 @@ int main(int argc, char *argv[])
 	db_set_pattern_t  db_set_pattern[NUM_ARTERIAL_CONTROLLERS];
 
 	int option;
-	int test_indexHIGH = -1;
-	int test_indexLOW = -1;
 	int exitsig;
 	db_clt_typ *pclt;
 	char hostname[MAXHOSTNAMELEN+1];
@@ -162,10 +160,6 @@ int main(int argc, char *argv[])
 	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};               // this is the register of harmonic mean speed in previous time step
 	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};             // this is the register of mean speed in previous time step
 	float density_prev [NUM_CONTROLLER_VARS/6] = {0};             // this is the register of density in previous time step
-	float OR_flow_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp flow in previous time step
-	float OR_occupancy_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp occupancy in previous time step
-	float FR_flow_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp flow in previous time step
-	float FR_occupancy_prev [NUM_ONRAMPS] = {0};               // this is the register of on-ramp occupancy in previous time step
 	float float_temp;
 	float ML_flow_ratio = 0.0; // current most upstream flow to historical most upstream flow
 	float current_most_upstream_flow = 0.0;
@@ -174,6 +168,7 @@ int main(int argc, char *argv[])
 	struct tm *ltime;
 	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
 	struct confidence confidence[num_controller_vars][3]; 
+	int ms_now, ms_sav[NUM_ARTERIAL_CONTROLLERS], ms_diff[NUM_ARTERIAL_CONTROLLERS];
 
 	float temp_ary_vol[NUM_CYCLE_BUFFS] = {0};    // temporary array of cyclic buffer
 	float temp_ary_speed[NUM_CYCLE_BUFFS] = {0};
@@ -185,18 +180,8 @@ int main(int argc, char *argv[])
 	float temp_ary_OR_queue_detector_occ[NUM_CYCLE_BUFFS] = {0}; 
 	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0}; 
-	int arterial_desc_index = 0;
-	int do_arterial_control[NUM_RAMP_CONTROLLERS] = {0};
 	int control_period_disable = 1;
-	int inter_threshold_flag = 0;
-//NumOnRamp=3
-	//int num_zero_tolerant = 10;
-    //int OR_flow_zero_counter[NumOnRamp] = {0};
-    //int OR_occ_zero_counter[NumOnRamp] = {0};
-    //int FR_flow_zero_counter[NumOnRamp] = {0};
-    //int FR_occ_zero_counter[NumOnRamp] = {0};
 
-//	Example: metering_rates[0...10] = Calvine_EB_Metering_Rate...12th_St_Metering_Rate;
 	short metering_controller_db_vars[] = {
 		3002,	//Capitol Expy
 		3202,	//Alum Rock Loop
@@ -233,13 +218,6 @@ int main(int argc, char *argv[])
 			case 'r':
 				pts = &controller_data2[20].ts;
 				break;
-			case 't':
-				test_indexLOW = atoi(optarg);
-				break;
-			case 'T':
-				test_indexHIGH = atoi(optarg);
-				break;
-
 			default:
 				printf("\nUsage: %s %s\n", argv[0], usage);
 				exit(EXIT_FAILURE);
@@ -293,6 +271,11 @@ int main(int argc, char *argv[])
 		db_set_pattern[i].pattern = arterial_controllers[i].pattern;
 	}
 
+	get_current_timestamp(&ts); // get current time step
+	ms_now = TS_TO_MS(&ts);
+	for(i=0; i<NUM_ARTERIAL_CONTROLLERS; i++)
+		ms_sav[i] = ms_now;
+
 //BEGIN MAIN FOR LOOP HERE
 	for(;;)	
 	{
@@ -313,18 +296,14 @@ int main(int argc, char *argv[])
 ###################################################################################################################*/
 
 // Cheng-Ju's code here
-// 4 off-ramp is missing, total number of off-ramps is 9. After D3 fix those missing off-ramps, OffRampIndex table need to be updated. 
-
-// This part aggregate data for each URMS2070 controller in the field   
-	//int OnRampIndex [NUM_CONTROLLER_VARS/6] =  { 0, -1, 2,  3, -1, 5,  6, -1, 8,  9, -1, 11, 12, -1, -1, -1, 16, 17, -1, 19, 20, -1, 22, 23, -1, 25, -1, -1}; 
-	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, 17, -1, 19, 20, 21, -1, 23, -1, 25, -1, 27};  
-	//int OffRampIndex [NUM_CONTROLLER_VARS/6] = {-1, -1, 2, -1, -1, 5, -1, -1, 8, -1, 10, -1, -1, -1, -1, -1, 16, -1, -1, -1, -1, 21, -1, 23, -1, -1, -1, 27};  
     
 	get_current_timestamp(&ts); // get current time step
 	print_timestamp(dbg_st_file_out, pts); // #1 print out current time step to file
  
 	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
-		printf("opt_crm: IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", 
+		printf("\n\n\nopt_crm: ");
+		print_timestamp(stdout, pts);
+		printf(" IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", 
 			controller_strings[i], 
 			controller_data[i].metered_lane_stat[0].passage_vol, 
 			controller_data[i].metered_lane_stat[0].demand_vol, 
@@ -363,7 +342,6 @@ int main(int argc, char *argv[])
 		mean_speed_prev[i] = controller_mainline_data[i].agg_mean_speed;
 		density_prev[i] = controller_mainline_data[i].agg_density;
 
-//fprintf(dbg_st_file_out,"C%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_vol); //2,15,28,41,54
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_occ); //3,16,29,42,55
 		fprintf(dbg_st_file_out,"%f ", controller_mainline_data[i].agg_speed); //4,17,30,43,56
@@ -396,11 +374,13 @@ int main(int argc, char *argv[])
 				(float)confidence[i][1].num_good_vals
 			);
 		controller_onramp_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ) );
+		if(i == 3)
+			controller_onramp_data[i].agg_occ = (float)((((unsigned short)(controller_data2[i].queue_stat[0][1].occ_msb * 256)) + (unsigned char)controller_data2[i].queue_stat[0][1].occ_lsb) * 0.1);
+		printf("####controller_onramp_data[%d].agg_occ %f\n", i, controller_onramp_data[i].agg_occ);
 
 		// data from on-ramp queue detector
-//		controller_onramp_queue_detector_data[i].agg_vol = Mind(6000.0, Maxd( 0, flow_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
-//		controller_onramp_queue_detector_data[i].agg_occ = Mind(100.0, Maxd( 0, occupancy_aggregation_onramp_queue(&controller_data[i], &controller_data2[i], &confidence[i][1]) ));
 printf("controller_data2[%d].queue_stat[0][0].occ_msb %hhu controller_data2[%d].queue_stat[0][0].occ_lsb %hhu\n", i, controller_data2[i].queue_stat[0][0].occ_msb, i, controller_data2[i].queue_stat[0][0].occ_lsb);
+printf("controller_data2[%d].queue_stat[0][1].occ_msb %hhu controller_data2[%d].queue_stat[0][1].occ_lsb %hhu\n", i, controller_data2[i].queue_stat[0][1].occ_msb, i, controller_data2[i].queue_stat[0][1].occ_lsb);
 		if(confidence[i][1].num_total_vals > 0)
 			printf("Confidence for controller %s onramp occupancy (queue) %f total_vals %f good vals %f\n",
 				controller_strings[i], (float)confidence[i][1].num_good_vals/confidence[i][1].num_total_vals, 
@@ -408,7 +388,6 @@ printf("controller_data2[%d].queue_stat[0][0].occ_msb %hhu controller_data2[%d].
 				(float)confidence[i][1].num_good_vals
 			);
  
-		//fprintf(dbg_st_file_out,"OR%d ", i); //controller index 
 		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_vol); //10,23,36,49,62
 		fprintf(dbg_st_file_out,"%f ", controller_onramp_data[i].agg_occ);//11,24,37,50,63
 		fprintf(dbg_st_file_out,"%f ", controller_onramp_queue_detector_data[i].agg_vol); //12,25,38,51,64
@@ -452,14 +431,6 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 		mainline_out[cycle_index][i].agg_occ =  Mind(90.0, Maxd(temp_occ/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_density = Mind(200.0, Maxd(temp_density/temp_num_ct,1));
 
-		/*
-		fprintf(dbg_st_file_out,"S%d,cyc%d ", i,cycle_index); //controller index 
-		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_vol); 
-		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_speed); 
-		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_occ); 
-		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_density); 
-		fprintf(dbg_st_file_out,"%f ", mainline_out[cycle_index][i].agg_mean_speed);
-        */
 
 		// Initialize all temp variables
 		temp_num_ct = 0.0; 
@@ -480,7 +451,6 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 	}
 //NumOnRamp=3
 //This part aggregate onramp data for each section <--- match number of off-ramp by number of on-ramp 		 
-	//int offrampCTidx[NumOnRamp] = {8, -1, 10, -1, 16, 17, 19, 20, 21, 23, 25}; // 4 off-ramp is missing, total number of off-ramps is 9
 	int offrampCTidx[NumOnRamp] = {2, 3, 4}; // 4 off-ramp is missing, total number of off-ramps is 9
 	for(i=0;i<NumOnRamp;i++){ //NumOnRamp=3
 		if (offrampCTidx[i] != -1.0){//<-- impute data here
@@ -491,21 +461,6 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 			offramp_out[cycle_index][i].agg_occ = 0.0;
 		}
 	} 
-
-/*
-// flow balance of mainline by using filtered data
-      for(i=0;i<SecSize;i++){
-		  if(mainline_out[cycle_index][i].agg_vol < 100.0){
-			  if (i==0){
-                  mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol+offramp_out[cycle_index][1].agg_vol;
-			  }else if (i==11){
-                  mainline_out[cycle_index][i].agg_vol = offramp_out[cycle_index][i].agg_vol-onramp_out[cycle_index][i-1].agg_vol;
-			  }else{
-                  mainline_out[cycle_index][i].agg_vol = mainline_out[cycle_index][i+1].agg_vol+offramp_out[cycle_index][i-1].agg_vol-onramp_out[cycle_index][i-1].agg_vol;
-			  }
-		  }
-	  }
-*/
    
 // replace bad flow data by upstream data
 //if flow < 100 do upstream downstrean interpolation flow data
@@ -593,12 +548,6 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 	  onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
 	  onramp_queue_out_f[i].agg_vol = mean_array(temp_ary_OR_queue_detector_vol,NUM_CYCLE_BUFFS); 
 
-	  // register of on-ramp and off-ramp data in previous time step
-	  OR_flow_prev[i] = onramp_out_f[i].agg_vol;   
-	  OR_occupancy_prev[i] = onramp_out_f[i].agg_occ;
-	  FR_flow_prev[i] =  offramp_out_f[i].agg_vol;
-	  FR_occupancy_prev[i] = offramp_out_f[i].agg_occ;
- 
     }
 
 // Butterworth filter for mainline
@@ -630,24 +579,18 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 
 		} 
         
-     	//fprintf(st_file_out,"\n");
-
 		for(i=0;i<NumOnRamp;i++) //NumOnRamp=3
 		{	
 				detection_onramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(onramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_onramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((onramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 
 				detection_offramp[i]->data[Np-1].flow=Mind(6000.0, Maxd(offramp_out_f[i].agg_vol, 100.0*(1.0+0.5*rand()/RAND_MAX)));
 				detection_offramp[i]->data[Np-1].occupancy=Mind(100.0, Maxd((offramp_out_f[i].agg_occ), 5.0*(1.0+0.5*rand()/RAND_MAX))); 	
-				//fprintf(st_file_out,"OR %d ", i);//
 				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_vol);      //18,24,30
 				fprintf(st_file_out,"%.6f ", onramp_out_f[i].agg_occ);      //19,25,31
-				//fprintf(st_file_out,"\n");//
-				//fprintf(st_file_out,"FR %d ", i);//
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_vol);     //20,26,32
 				fprintf(st_file_out,"%.6f ", offramp_out_f[i].agg_occ);     //21,27,33
 				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_vol);//22,28,34
 				fprintf(st_file_out,"%.6f ", onramp_queue_out_f[i].agg_occ);//23,29,35
-				//fprintf(st_file_out,"\n");//
 				
 				max_occ_2_dwn[i]=detection_s[i]->data[Np-1].occupancy;	
 				max_occ_all_dwn[i]=detection_s[i]->data[Np-1].occupancy;		
@@ -692,24 +635,15 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 				fprintf(st_file_out,"%d ", controller_data3[i].metering_rate[j]); //36->50
 
 		
+		get_current_timestamp(&ts); // get current time step
+		ms_now = TS_TO_MS(&ts);
+
 		for( i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++) //NUM_ARTERIAL_CONTROLLERS=14
 		{
 			if((arterial_desc[i].ctl_permission == CTL) &&
 				(arterial_desc[i].controlling_rm_index >= 0))
 			
 			{
-printf("Got to 1 i %d arterial_desc[i].controlling_rm_index-2 %d test_indexHIGH %d test_indexLOW %d\n", i, arterial_desc[i].controlling_rm_index-2, test_indexHIGH, test_indexLOW);
-//#define TEST
-//#ifdef TEST
-//if(arterial_desc[i].controlling_rm_index-2 == test_indexHIGH) {
-//	fprintf(stderr, "Setting controller %d to 80% occupancy\n", arterial_desc[i].controlling_rm_index-2);
-//	onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ = 80;
-//}
-//if(arterial_desc[i].controlling_rm_index-2 == test_indexLOW) {
-//	fprintf(stderr, "Setting controller %d to 20% occupancy\n", arterial_desc[i].controlling_rm_index-2);
-//	onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ = 20;
-//}
-//#endif
 				if( clock_gettime(CLOCK_REALTIME, &curr_timespec) < 0)
 					perror("urms clock_gettime");
 				ltime = localtime(&curr_timespec.tv_sec);
@@ -729,11 +663,24 @@ printf("Got to 1 i %d arterial_desc[i].controlling_rm_index-2 %d test_indexHIGH 
 													   //array with NumOnRamp (==3) members. arterial_desc includes all of the ramp controllers,
 													   //even the 2 controllers that were not in the onramp_out_f calculation.
 				{
-					arterial_desc[i].ctl_state = CTL; 				//set control to CTL
-					if(!global_disable && !control_period_disable && (arterial_controllers[i].preemption == 0)) {//For disabling of control due to startup disable or outside-of-control-period disable, or to EV preemption
+					ms_diff[i] = ms_now - ms_sav[i];
+					if(!global_disable && !control_period_disable && (ms_diff[i] >= CTL_INTRVL_MS)) {//For disabling of control due to startup disableopt_crm_05201921_000001.txt or outside-of-control-period disable, or to EV preemption
+						arterial_desc[i].ctl_state = CTL; 				//set control to CTL
 						db_set_pattern[i].pattern = arterial_desc[i].pattern;
 						db_clt_write(pclt, arterial_desc[i].db_var+1, sizeof(db_set_pattern_t), &db_set_pattern[i].pattern); 
-						inter_threshold_flag = 1;
+						ramp_meter_desc[arterial_desc[i].controlling_rm_index].inter_threshold_flag = 1;
+						ms_sav[i] = ms_now;
+						print_timestamp(stdout, pts);
+						printf("PLAN CHANGE EXECUTED for %s due to occupancy %f, which is over 40%. Plan changed to %d\n", 
+							arterial_desc[i].name,
+							onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ,
+							db_set_pattern[i].pattern
+						);
+						printf("PLAN CHANGE:  i=%d arterial_desc[%d].controlling_rm_index %d\n",
+							i,
+							i,
+							arterial_desc[i].controlling_rm_index
+						);
 					}
 				}
 				else 
@@ -742,22 +689,28 @@ printf("Got to 1 i %d arterial_desc[i].controlling_rm_index-2 %d test_indexHIGH 
 													   //even the 2 controllers that were not in the onramp_out_f calculation.
 					{
 						arterial_desc[i].ctl_state = NOCTL; 				//set control to NOCTL
-						if(!global_disable && !control_period_disable && (arterial_controllers[i].preemption == 0)) {//For disabling of control due to startup disable or outside-of-control-period disable, or to EV preemption
-							if(ltime->tm_hour < 9)
-								db_set_pattern[i].pattern = arterial_desc[i].SJ_pattern_7_to_9;
-							else
-								db_set_pattern[i].pattern = arterial_desc[i].SJ_pattern_9_to_16;
-							db_clt_write(pclt, arterial_desc[i].db_var+1, sizeof(db_set_pattern_t), &db_set_pattern[i].pattern); 
-							inter_threshold_flag = 0;
-						}
+						ramp_meter_desc[arterial_desc[i].controlling_rm_index].inter_threshold_flag = 0;
 					}
 				else {
-					if(inter_threshold_flag == 1) 
+					if(ramp_meter_desc[arterial_desc[i].controlling_rm_index].inter_threshold_flag == 1)
 					{
-						arterial_desc[i].ctl_state = CTL; 				//set control to CTL
-						if(!global_disable && !control_period_disable && (arterial_controllers[i].preemption == 0)) {//For disabling of control due to startup disable or outside-of-control-period disable, or to EV preemption
+						ms_diff[i] = ms_now - ms_sav[i];
+						if(!global_disable && !control_period_disable && (ms_diff[i] > CTL_INTRVL_MS)) {//For disabling of control due to startup disable or outside-of-control-period disable, or to EV preemption
+							arterial_desc[i].ctl_state = CTL; 				//set control to CTL
 							db_set_pattern[i].pattern = arterial_desc[i].pattern;
 							db_clt_write(pclt, arterial_desc[i].db_var+1, sizeof(db_set_pattern_t), &db_set_pattern[i].pattern); 
+							ms_sav[i] = ms_now;
+							print_timestamp(stdout, pts);
+							printf("PLAN CHANGE EXECUTED for %s due to occupancy %f, which less than 40%, but more than 30%. Plan changed to %d\n", 
+								arterial_desc[i].name,
+								onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ,
+								db_set_pattern[i].pattern
+							);
+							printf("PLAN CHANGE:  i=%d arterial_desc[%d].controlling_rm_index %d\n",
+								i,
+								i,
+								arterial_desc[i].controlling_rm_index
+							);
 						}
 					}
 				}
@@ -771,8 +724,17 @@ printf("Got to 1 i %d arterial_desc[i].controlling_rm_index-2 %d test_indexHIGH 
 		}
 		for (i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++)
 			print_status(NULL, st_file_out, &arterial_controllers[i], 0);
-		fprintf(st_file_out, "%d ", global_disable);
+		for (i = 0; i < NUM_ARTERIAL_CONTROLLERS; i++) { //starts at 1316
+		fprintf(st_file_out, "%d ", global_disable); //1316,1321,1326,1331,1336,1341,1346,1351,1356,1361,1366,1371.1376,1381
+		ms_diff[i] = ms_now - ms_sav[i];
+		fprintf(st_file_out, "%d ", ms_diff[i]); //1317,1322,1327,1332,1337,1342,1347,1352,1357,1362,1367,1372,1377,1382
+		fprintf(st_file_out, "%d ", control_period_disable); //1318,1323,1328,1333,1338,1343,1348,1353,1358,1363,1368,1373,1378,1383
+		fprintf(st_file_out, "%#hhx ", arterial_controllers[i].preemption); //1319,1324,1329,1334,1339,1344,1349,1354,1359,1364,1369,1374,1379,1384
+		fprintf(st_file_out, "%#hhx ", (arterial_controllers[i].preemption & 0x0f)); //1320,1325,1330,1335,1340,1345,1350,1355,1360,1365,1370,1375,1380,1385
+		}
 
+		for (i = 0; i < NUM_RAMP_CONTROLLERS; i++) //starts at 1386
+			fprintf(st_file_out, "%d ", ramp_meter_desc[arterial_desc[i].controlling_rm_index].inter_threshold_flag);
 		fprintf(st_file_out,"\n");
 		fflush(st_file_out);
 
@@ -782,10 +744,10 @@ printf("Got to 1 i %d arterial_desc[i].controlling_rm_index-2 %d test_indexHIGH 
 		      XYLu code start from here
 	
 		**************************************************/ 
-//		det_data_4_contr(time);	
-//		get_meas(time);		
-//		update_q_R();
-//		opt_metering();
+		det_data_4_contr(time);	
+		get_meas(time);		
+		update_q_R();
+		opt_metering();
 		
 		fprintf(cal_opt_f,"%lf ", time);   // Output calculated Opt RM rt
 		for (i=0;i<NumOnRamp;i++)
@@ -1023,7 +985,7 @@ int update_queue(float time)  // This will not be used since we have onramp leng
 	return 1;
 }
 
-/*
+
 int det_data_4_contr(float time) // not used anymore
 {
 	int i,j;
@@ -1059,7 +1021,6 @@ int det_data_4_contr(float time) // not used anymore
 	
 	return 1;
 }
-*/
 
 int update_q_R()       // update flow for each cell
 {
