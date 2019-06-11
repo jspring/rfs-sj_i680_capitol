@@ -125,9 +125,9 @@ int main(int argc, char *argv[])
 	int i, j;
 	int min_index;
 	db_urms_t urms_ctl[NumOnRamp] = {{0}};//NumOnRamp=3
-	db_urms_status_t controller_data[NUM_CONTROLLER_VARS/6];  //See warning at top of file
-	db_urms_status2_t controller_data2[NUM_CONTROLLER_VARS/6];  //See warning at top of file
-	db_urms_status3_t controller_data3[NUM_CONTROLLER_VARS/6];  //See warning at top of file
+	db_urms_status_t controller_data[NUM_CONTROLLERS];  //See warning at top of file
+	db_urms_status2_t controller_data2[NUM_CONTROLLERS];  //See warning at top of file
+	db_urms_status3_t controller_data3[NUM_CONTROLLERS];  //See warning at top of file
 
 	get_long_status8_resp_mess_typ arterial_controllers[NUM_ARTERIAL_CONTROLLERS]; //arterial controllers
 	db_set_pattern_t  db_set_pattern[NUM_ARTERIAL_CONTROLLERS];
@@ -153,20 +153,20 @@ int main(int argc, char *argv[])
 	agg_data_t onramp_queue_out_f[NumOnRamp] = {{0}};  // save filtered data queue detector data to this array//NumOnRamp=3
 	 
 	
-	agg_data_t controller_mainline_data[NUM_CONTROLLER_VARS/6] = {{0}};     // data aggregated controller by controller 
+	agg_data_t controller_mainline_data[NUM_CONTROLLERS] = {{0}};     // data aggregated controller by controller 
 	agg_data_t controller_onramp_data[NUM_ONRAMPS] = {{0}};                 // data aggregated controller by controller
 	agg_data_t controller_onramp_queue_detector_data[NUM_ONRAMPS] = {{0}};
 	agg_data_t controller_offramp_data[NUM_OFFRAMPS] = {{0}};               // data aggregated controller by controller
-	float hm_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};               // this is the register of harmonic mean speed in previous time step
-	float mean_speed_prev [NUM_CONTROLLER_VARS/6] = {1.0};             // this is the register of mean speed in previous time step
-	float density_prev [NUM_CONTROLLER_VARS/6] = {0};             // this is the register of density in previous time step
+	float hm_speed_prev [NUM_CONTROLLERS] = {1.0};               // this is the register of harmonic mean speed in previous time step
+	float mean_speed_prev [NUM_CONTROLLERS] = {1.0};             // this is the register of mean speed in previous time step
+	float density_prev [NUM_CONTROLLERS] = {0};             // this is the register of density in previous time step
 	float float_temp;
 	float ML_flow_ratio = 0.0; // current most upstream flow to historical most upstream flow
 	float current_most_upstream_flow = 0.0;
 	int global_disable = 0;
 	struct timespec curr_timespec;
 	struct tm *ltime;
-	int num_controller_vars = NUM_CONTROLLER_VARS/6; //See warning at top of file
+	int num_controller_vars = NUM_CONTROLLERS; //See warning at top of file
 	struct confidence confidence[num_controller_vars][3]; 
 	int ms_now, ms_sav[NUM_ARTERIAL_CONTROLLERS], ms_diff[NUM_ARTERIAL_CONTROLLERS];
 
@@ -224,9 +224,9 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
-	memset(controller_data, 0, NUM_CONTROLLER_VARS/6 * (sizeof(db_urms_status_t)));//See warning at top of file
-	memset(controller_data2, 0, NUM_CONTROLLER_VARS/6 * (sizeof(db_urms_status2_t)));//See warning at top of file
-	memset(controller_data3, 0, NUM_CONTROLLER_VARS/6 * (sizeof(db_urms_status3_t)));//See warning at top of file
+	memset(controller_data, 0, NUM_CONTROLLERS * (sizeof(db_urms_status_t)));//See warning at top of file
+	memset(controller_data2, 0, NUM_CONTROLLERS * (sizeof(db_urms_status2_t)));//See warning at top of file
+	memset(controller_data3, 0, NUM_CONTROLLERS * (sizeof(db_urms_status3_t)));//See warning at top of file
 
 	get_local_name(hostname, MAXHOSTNAMELEN);
 
@@ -300,7 +300,7 @@ int main(int argc, char *argv[])
 	get_current_timestamp(&ts); // get current time step
 	print_timestamp(dbg_st_file_out, pts); // #1 print out current time step to file
  
-	for(i=0;i<NUM_CONTROLLER_VARS/6;i++){
+	for(i=0;i<NUM_CONTROLLERS;i++){
 		printf("\n\n\nopt_crm: ");
 		print_timestamp(stdout, pts);
 		printf(" IP %s onramp1 passage volume %d demand vol %d offramp volume %d\n", 

@@ -62,8 +62,7 @@ db_id_t db_controller_list[] =  {
 	{DB_166_253_101_112_VAR + 5, sizeof(db_ramp_data_t)},
 	{DB_166_255_77_235_VAR + 5, sizeof(db_ramp_data_t)},
 };
-#define NUM_CONTROLLER_VARS (sizeof(db_controller_list)/sizeof(db_id_t))
-
+#define NUM_CONTROLLERS (sizeof(db_controller_list)/(sizeof(db_id_t) * 6) )
 
 int db_trig_list[] =  {
 	DB_166_253_101_113_VAR,

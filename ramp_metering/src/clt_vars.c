@@ -65,11 +65,11 @@ int main(int argc, char *argv[])
 	 */
 	get_local_name(hostname, MAXHOSTNAMELEN);
 	if ((pclt = db_list_init(argv[0], hostname, domain, xport, 
-			db_controller_list, NUM_CONTROLLER_VARS, NULL, 0)) == NULL) {
+			db_controller_list, NUM_CONTROLLERS * 6, NULL, 0)) == NULL) {
 		printf("Database initialization error in %s.\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
-	for (i = 0; i < NUM_CONTROLLER_VARS; i++){
+	for (i = 0; i < NUM_CONTROLLERS * 6; i++){
 		db_clt_write(pclt,
 		db_controller_list[i].id,
 		db_controller_list[i].size,
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	}
 
 	if(( exitsig = setjmp(exit_env)) != 0) {
-		db_list_done(pclt, db_controller_list, NUM_CONTROLLER_VARS, NULL, 0);
+		db_list_done(pclt, db_controller_list, NUM_CONTROLLERS * 6, NULL, 0);
 		exit(EXIT_SUCCESS);
 	} else
 		sig_ign(sig_list, sig_hand);
