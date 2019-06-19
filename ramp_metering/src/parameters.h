@@ -29,6 +29,8 @@
 #define Gain_Up			8.0
 #define Gain_Dn			4.0
 #define Occ_Cr			12.0
+#define OnRamp_Occ_Cr		30.0
+
 
 //#define CellSize 15
 #define ALLvehType          	0
@@ -97,8 +99,8 @@ static int StateOff=0;
 //static int count=1;
 
 static float u[SecSize]={0};    // For all cells
-float alpha[SecSize]={0};
-float beta_c[SecSize]={0};
+//float alpha[SecSize]={0};
+//float beta_c[SecSize]={0};
 static float q[SecSize]={0.0};   // composite mainline flow
 static float v[SecSize]={0.0};   // composite speed for each cell
 static float o[SecSize]={0.0};   // composite occupancy for each cell
@@ -150,7 +152,7 @@ static float ln_LRRM_rt[NumOnRamp][max_onramp_ln]={{0.0,0.0,0.0},{0.0,0.0,0.0}};
 	const float max_Ln_RM_rt[NumOnRamp]=  {950,950,950,950}; // revised lower bound  9/28/16
 										  
 	
-	// for 4 onramps
+	// for downstream 11 onramps only
 	const int N_OnRamp_Ln[NumOnRamp]={1,2,2,2};  // from upstream to downstream
 	const int N_OffRamp_Ln[NumOnRamp]={1,1,0,0};  // from upstream to downstream
 	
@@ -162,7 +164,7 @@ static float onrampL[NumOnRamp]={152.4, 152.4, 304.8, 304.8};
 
 const float lambda[SecSize]={4.0,4.0,4.0,4.0, 4.0}; // composite ln number
 
-const double SR99_RM_occ_tbl[N_interv][NumOnRamp]=
+const float SR99_RM_occ_tbl[N_interv][NumOnRamp]=
    {{6.0,   5.0,    5.0, 5.0},
     {6.9,   6.1,    6.1, 6.1},
     {7.7,   7.1,    7.1, 7.1},
@@ -175,10 +177,10 @@ const double SR99_RM_occ_tbl[N_interv][NumOnRamp]=
     {13.7,  14.5,   14.6, 14.6},
     {14.6,  15.6,   15.7, 15.7},
     {15.4,  16.6,   16.8, 16.8},
-    {16.3,  17.7,   17.9, 17,9},
+    {16.3,  17.7,   17.9, 17.9},
     {17.1,  18.7,   18.9, 18.9},
     {18.0,  19.8,   20.0, 20.0}};
-const double SR99_RM_rate_tbl[N_interv][NumOnRamp]=
+const float SR99_RM_rate_tbl[N_interv][NumOnRamp]=
    {{ 1000,    750,  910, 910},
     { 963,    740,   894, 894},
     { 926,    729,   878, 878},

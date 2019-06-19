@@ -1,5 +1,6 @@
 #include <db_include.h>
 #include "resource.h"
+//#include "parameters.h"
 
 #include <urms.h>
 #include <math.h>
@@ -15,6 +16,13 @@
 // occupancy is 0 to 100
 
 //float flow_aggregation_3_lanes(float flow_lane_1,float flow_lane_2, float flow_lane_3);
+
+#ifndef SecSize
+	#define SecSize 5
+#endif
+#ifndef NumOnRamp
+	#define NumOnRamp 4
+#endif
 
 float maxd(float a,float b){
 	if(a>=b){
@@ -816,56 +824,92 @@ float butt_2(float in_dat){
    return out_dat;
 }
 
-float butt_2_ML_flow(float in_dat, int index){
-   // 12 is section size
-   float x[2][12]={{0}}, out_dat=0.0;
-   static float x_old_flow[2][12]={{0}};
+float butt_2_ML_flow(float in_dat, int index)
+{ 
+   static float x[2][SecSize]={{0}}, out_dat=0.0;
+   static float x_old[2][SecSize]={{0}};
+   static int mst_sw=1;
    
-   x[0][index]=0.2779 * x_old_flow[0][index] - 0.4152 * x_old_flow[1][index] + 0.5872*in_dat;
-   x[1][index]=0.4152 * x_old_flow[0][index] + 0.8651 * x_old_flow[1][index] + 0.1908*in_dat;  
+   if (mst_sw==1)
+	{
+   		memset(x, 0, sizeof(float)*2*SecSize);
+   		memset(x_old, 0, sizeof(float)*2*SecSize);
+   		mst_sw=0;
+	}
+   
+   x[0][index]=0.2779 * x_old[0][index] - 0.4152 * x_old[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old[0][index] + 0.8651 * x_old[1][index] + 0.1908*in_dat;  
    out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
-   x_old_flow[0][index]=x[0][index];
-   x_old_flow[1][index]=x[1][index];
+   x_old[0][index]=x[0][index];
+   x_old[1][index]=x[1][index];
+   
    return out_dat;
 }
 
 
-float butt_2_ML_speed(float in_dat, int index){
-   // 12 is section size
-   float x[2][12]={{0}}, out_dat=0.0;
-   static float x_old_speed[2][12]={{0}};
+float butt_2_ML_speed(float in_dat, int index)
+{
+   static float x[2][SecSize]={{0}}, out_dat=0.0;
+   static float x_old[2][SecSize]={{0}};
+   static int mst_sw=1;
    
-   x[0][index]=0.2779 * x_old_speed[0][index] - 0.4152 * x_old_speed[1][index] + 0.5872*in_dat;
-   x[1][index]=0.4152 * x_old_speed[0][index] + 0.8651 * x_old_speed[1][index] + 0.1908*in_dat;  
+   if (mst_sw==1)
+	{
+   		memset(x, 0, sizeof(float)*2*SecSize);
+   		memset(x_old, 0, sizeof(float)*2*SecSize);
+   		mst_sw=0;
+	}
+   
+   x[0][index]=0.2779 * x_old[0][index] - 0.4152 * x_old[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old[0][index] + 0.8651 * x_old[1][index] + 0.1908*in_dat;  
    out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
-   x_old_speed[0][index]=x[0][index];
-   x_old_speed[1][index]=x[1][index];
+   x_old[0][index]=x[0][index];
+   x_old[1][index]=x[1][index];
+   
    return out_dat;
 }
 
-float butt_2_ML_occupancy(float in_dat, int index){
-   // 12 is section size
-   float x[2][12]={{0}}, out_dat=0.0;
-   static float x_old_occupancy[2][12]={{0}};
+float butt_2_ML_occupancy(float in_dat, int index)
+{
+   static float x[2][SecSize]={{0}}, out_dat=0.0;
+   static float x_old[2][SecSize]={{0}};
+   static int mst_sw=1;
    
-   x[0][index]=0.2779 * x_old_occupancy[0][index] - 0.4152 * x_old_occupancy[1][index] + 0.5872*in_dat;
-   x[1][index]=0.4152 * x_old_occupancy[0][index] + 0.8651 * x_old_occupancy[1][index] + 0.1908*in_dat;  
+   if (mst_sw==1)
+	{
+   		memset(x, 0, sizeof(float)*2*SecSize);
+   		memset(x_old, 0, sizeof(float)*2*SecSize);
+   		mst_sw=0;
+	}
+   
+   x[0][index]=0.2779 * x_old[0][index] - 0.4152 * x_old[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old[0][index] + 0.8651 * x_old[1][index] + 0.1908*in_dat;  
    out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
-   x_old_occupancy[0][index]=x[0][index];
-   x_old_occupancy[1][index]=x[1][index];
+   x_old[0][index]=x[0][index];
+   x_old[1][index]=x[1][index];
+   
    return out_dat;
 }
 
-float butt_2_ML_density(float in_dat, int index){
-   // 12 is section size
-   float x[2][12]={{0}}, out_dat=0.0;
-   static float x_old_density[2][12]={{0}};
+float butt_2_ML_density(float in_dat, int index)
+{
+   static float x[2][SecSize]={{0}}, out_dat=0.0;
+   static float x_old[2][SecSize]={{0}};
+   static int mst_sw=1;
    
-   x[0][index]=0.2779 * x_old_density[0][index] - 0.4152 * x_old_density[1][index] + 0.5872*in_dat;
-   x[1][index]=0.4152 * x_old_density[0][index] + 0.8651 * x_old_density[1][index] + 0.1908*in_dat;  
+   if (mst_sw==1)
+	{
+   		memset(&x, 0, sizeof(float)*2*SecSize);
+   		memset(&x_old, 0, sizeof(float)*2*SecSize);
+   		mst_sw=0;
+	}
+   
+   x[0][index]=0.2779 * x_old[0][index] - 0.4152 * x_old[1][index] + 0.5872*in_dat;
+   x[1][index]=0.4152 * x_old[0][index] + 0.8651 * x_old[1][index] + 0.1908*in_dat;  
    out_dat = 0.1468*x[0][index] + 0.6594*x[1][index] + 0.0675*in_dat;
-   x_old_density[0][index]=x[0][index];
-   x_old_density[1][index]=x[1][index];
+   x_old[0][index]=x[0][index];
+   x_old[1][index]=x[1][index];
+   
    return out_dat;
 }
 

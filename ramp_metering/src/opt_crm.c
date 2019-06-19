@@ -120,8 +120,7 @@ int main(int argc, char *argv[])
 	timestamp_t *pts = &ts;
 	float time = 0; // time2 = 0,timeSta = 0, tmp=0.0;
 	static int init_sw=1;
-	int i, j, k;
-	int min_index;
+	int i, j, k, l;
 	db_urms_t urms_ctl[NumOnRamp] = {{0}};
 	db_urms_status_t controller_data[NUM_CONTROLLERS ];  //See warning at top of file
 	db_urms_status2_t controller_data2[NUM_CONTROLLERS ];  //See warning at top of file
@@ -136,7 +135,7 @@ int main(int argc, char *argv[])
 	char hostname[MAXHOSTNAMELEN+1];
 	posix_timer_typ *ptimer;       /* Timing proxy */
 	int interval = 30000;      /// Number of milliseconds between saves
-	int cycle_index = 0;
+	int cycle_index = -1;      //  Set to -1 at init because it's incremented at the beginning of the infinite for loop, instead of after
 	char *domain = DEFAULT_SERVICE; // usually no need to change this
 	int xport = COMM_OS_XPORT;      // set correct for OS in sys_os.h
 //	int verbose = 0;
@@ -150,7 +149,6 @@ int main(int argc, char *argv[])
 	static agg_data_t offramp_out_f[NumOnRamp] = {{0}};    // save filtered data to this array
 	static agg_data_t onramp_queue_out_f[NumOnRamp] = {{0}};  // save filtered data queue detector data to this array//NumOnRamp=4
 	 
-	
 	static agg_data_t controller_mainline_data[NUM_CONTROLLERS ] = {{0}};     // data aggregated controller by controller 
 	static agg_data_t controller_onramp_data[NumOnRamp] = {{0}};                 // data aggregated controller by controller
 	static agg_data_t controller_onramp_queue_detector_data[NumOnRamp] = {{0}};
@@ -177,7 +175,7 @@ int main(int argc, char *argv[])
 	float temp_ary_OR_queue_detector_vol[NUM_CYCLE_BUFFS] = {0};
 	float temp_ary_OR_queue_detector_occ[NUM_CYCLE_BUFFS] = {0}; 
 	float temp_ary_FR_vol[NUM_CYCLE_BUFFS] = {0};
-	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0}; 
+	float temp_ary_FR_occ[NUM_CYCLE_BUFFS] = {0};
 	int control_period_disable = 1;
 	
 		float temp_num_ct = 0.0; // number of controllers per section
@@ -258,6 +256,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_SUCCESS);
 	} else
 		sig_ign(sig_list, sig_hand);
+
 	 memset(mainline_out, 0, NUM_CYCLE_BUFFS*SecSize*(sizeof(agg_data_t)));  
 	 memset(onramp_out, 0, NUM_CYCLE_BUFFS*NumOnRamp*(sizeof(agg_data_t))); 
 	 memset(onramp_queue_out, 0, NUM_CYCLE_BUFFS*NumOnRamp*(sizeof(agg_data_t))); 
@@ -271,15 +270,6 @@ int main(int argc, char *argv[])
 	 memset(controller_onramp_queue_detector_data, 0, NumOnRamp*(sizeof(agg_data_t))); 
 	 memset(controller_offramp_data, 0, NumOnRamp*(sizeof(agg_data_t)));    
 	 memset(confidence, 0, num_controller_vars*3*(sizeof(struct confidence))); 
-	 memset(ln_CRM_rt, 0, NumOnRamp*max_onramp_ln*(sizeof(float))); 
-	 memset(ln_LRRM_rt, 0, NumOnRamp*max_onramp_ln*(sizeof(float))); 
-	 memset(dyna_min_r, 0, NumOnRamp*(sizeof(float))); 
-	 memset(dyna_max_r, 0, NumOnRamp*(sizeof(float))); 
-	 memset(Ramp_rt, 0, NumOnRamp*(sizeof(float))); 
-	 memset(RM_occ, 0, NumOnRamp*(sizeof(float))); 
-	 memset(release_cycle, 0, NumOnRamp*max_onramp_ln*(sizeof(int))); 
-	 memset(total_rt, 0, NumOnRamp*(sizeof(float))); 
-	 memset(total_LRRM_rt, 0, NumOnRamp*(sizeof(float))); 
 
 	if (init_sw==1)
 	{
@@ -463,7 +453,8 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 			}
 		}
 		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,1));
-		mainline_out[cycle_index][i].agg_speed = Mind(100.0, Maxd(temp_speed/temp_num_ct,1));
+		//mainline_out[cycle_index][i].agg_speed = Mind(100.0, Maxd(temp_speed/temp_num_ct,1));
+		mainline_out[cycle_index][i].agg_speed = controller_mainline_data[i].agg_speed;					// xylu: 6/15/19,  Bypassed using current step data
 		mainline_out[cycle_index][i].agg_occ =  Mind(90.0, Maxd(temp_occ/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_density = Mind(250.0, Maxd(temp_density/temp_num_ct,1));
 
@@ -535,9 +526,23 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 		
 	  }
 	  //onramp_out_f[i].agg_vol = mean_array(temp_ary_OR_vol,NUM_CYCLE_BUFFS);                // xylu: 6/13, causing crash
-	  onramp_out_f[i].agg_vol = controller_onramp_data[i+1].agg_vol;   						// xylu: 6/13, Temporarily by pass the processing  
+	  onramp_out_f[i].agg_vol = 1.1*(controller_onramp_data[onrampCTidx[i]].agg_vol);   						// xylu: 6/13, Temporarily by pass the processing  
 	  onramp_out_f[i].agg_occ = mean_array(temp_ary_OR_occ,NUM_CYCLE_BUFFS);
 	  onramp_queue_out_f[i].agg_vol = mean_array(temp_ary_OR_queue_detector_vol,NUM_CYCLE_BUFFS); 		
+	  
+	  
+	  if (offrampCTidx[i] > -1.0)
+	  	{
+	  		//offramp_out_f[i].agg_vol = mean_array(temp_ary_FR_vol,NUM_CYCLE_BUFFS);                // XYLu: moving average over-time, mean_arraay(), defined in resource.c	   
+	  		//offramp_out_f[i].agg_occ = mean_array(temp_ary_FR_occ,NUM_CYCLE_BUFFS);				 // due ot crashing
+	  		offramp_out_f[i].agg_vol = controller_offramp_data[offrampCTidx[i]].agg_vol;     
+	  		offramp_out_f[i].agg_occ = controller_offramp_data[offrampCTidx[i]].agg_vol;    
+  		}
+  	  else
+  		{
+	  		offramp_out_f[i].agg_vol = 0.0;
+	  		offramp_out_f[i].agg_occ = 0.0;
+  		}
     }
 
 // Butterworth filter for mainline
@@ -547,6 +552,7 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 	   mainline_out_f[i].agg_speed = butt_2_ML_speed(mainline_out_f[i].agg_speed, i);
        mainline_out_f[i].agg_occ = butt_2_ML_occupancy(mainline_out_f[i].agg_occ, i);
        mainline_out_f[i].agg_density=(mainline_out_f[i].agg_vol)/Maxd((mainline_out_f[i].agg_speed)*(lambda[i]), 10.0);  		// xylu: Revised  6/14/2019
+       mainline_out_f[i].agg_density=butt_2_ML_density((mainline_out_f[i].agg_vol)/Maxd((mainline_out_f[i].agg_speed)*(lambda[i]), 10.0),i);  		
 	   //mainline_out_f[i].agg_density = butt_2_ML_density(mainline_out_f[i].agg_density, i);
     }
 
@@ -654,19 +660,23 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 				else
 				    control_period_disable = 0;
 
-				if(onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ > 40) // && The -2 comes from the calculation for onramp_out_f, which uses a 0-indexed 
-													   //array with NumOnRamp (==3) members. arterial_desc includes all of the ramp controllers,
-													   //even the 2 controllers that were not in the onramp_out_f calculation.
+#define FIRST_ONRAMP_INDEX	1
+
+				if(onramp_out_f[arterial_desc[i].controlling_rm_index - FIRST_ONRAMP_INDEX].agg_occ > 40) // The FIRST_ONRAMP_INDEX comes from the calculation for onramp_out_f, 
+														//which uses a 0-indexed array with NumOnRamp (==4) members. arterial_desc 
+														//includes all of the ramp controllers, even the controllers that were not in the 
+														//onramp_out_f calculation.
 				{
 					ms_diff[i] = ms_now - ms_sav[i];
-					if(!global_disable && !control_period_disable && (ms_diff[i] >= CTL_INTRVL_MS)) {//For disabling of control due to startup disableopt_crm_05201921_000001.txt or outside-of-control-period disable, or to EV preemption
+					if(!global_disable && !control_period_disable && (ms_diff[i] >= CTL_INTRVL_MS)) {//For disabling of control due to startup disable or 
+															// outside-of-control-period disable
 						arterial_desc[i].ctl_state = CTL; 				//set control to CTL
 						db_set_pattern[i].pattern = arterial_desc[i].pattern;
 						db_clt_write(pclt, arterial_desc[i].db_var+1, sizeof(db_set_pattern_t), &db_set_pattern[i].pattern); 
 						ramp_meter_desc[arterial_desc[i].controlling_rm_index].inter_threshold_flag = 1;
 						ms_sav[i] = ms_now;
 						print_timestamp(stdout, pts);
-						printf("PLAN CHANGE EXECUTED for %s due to occupancy %f, which is over 40%. Plan changed to %d\n", 
+						printf("PLAN CHANGE EXECUTED for %s due to occupancy %f, which is over 40%%. Plan changed to %d\n", 
 							arterial_desc[i].name,
 							onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ,
 							db_set_pattern[i].pattern
@@ -679,9 +689,10 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 					}
 				}
 				else 
-					if(onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ <= 30) // && The -2 comes from the calculation for onramp_out_f, which uses a 0-indexed 
-													   //array with NumOnRamp (==3) members. arterial_desc includes all of the ramp controllers,
-													   //even the 2 controllers that were not in the onramp_out_f calculation.
+					if(onramp_out_f[arterial_desc[i].controlling_rm_index - FIRST_ONRAMP_INDEX ].agg_occ <= 30) // The FIRST_ONRAMP_INDEX comes from the calculation for onramp_out_f, 
+														//which uses a 0-indexed array with NumOnRamp (==4) members. arterial_desc 
+														//includes all of the ramp controllers, even the controllers that were not in the 
+														//onramp_out_f calculation.
 					{
 						arterial_desc[i].ctl_state = NOCTL; 				//set control to NOCTL
 						ramp_meter_desc[arterial_desc[i].controlling_rm_index].inter_threshold_flag = 0;
@@ -690,13 +701,14 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 					if(ramp_meter_desc[arterial_desc[i].controlling_rm_index].inter_threshold_flag == 1)
 					{
 						ms_diff[i] = ms_now - ms_sav[i];
-						if(!global_disable && !control_period_disable && (ms_diff[i] > CTL_INTRVL_MS)) {//For disabling of control due to startup disable or outside-of-control-period disable, or to EV preemption
+						if(!global_disable && !control_period_disable && (ms_diff[i] > CTL_INTRVL_MS)) {//For disabling of control due to startup disable or 
+																//outside-of-control-period disable
 							arterial_desc[i].ctl_state = CTL; 				//set control to CTL
 							db_set_pattern[i].pattern = arterial_desc[i].pattern;
 							db_clt_write(pclt, arterial_desc[i].db_var+1, sizeof(db_set_pattern_t), &db_set_pattern[i].pattern); 
 							ms_sav[i] = ms_now;
 							print_timestamp(stdout, pts);
-							printf("PLAN CHANGE EXECUTED for %s due to occupancy %f, which less than 40%, but more than 30%. Plan changed to %d\n", 
+							printf("PLAN CHANGE EXECUTED for %s due to occupancy %f, which less than 40%%, but more than 30%%. Plan changed to %d\n", 
 								arterial_desc[i].name,
 								onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ,
 								db_set_pattern[i].pattern
@@ -712,7 +724,7 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 			}
 		
 			fprintf(st_file_out,"%s %s %d %.2f %d ", 
-				arterial_desc[i].name,							//62,67,73,77,82,87,92,97,102,107,112,117,122,127
+				arterial_desc[i].name,							//62,67,72,77,82,87,92,97,102,107,112,117,122,127
 				ramp_meter_desc[arterial_desc[i].controlling_rm_index].name, 		//63,68,73,78,83,88,93,98,103,108,113,118,123,128
 				arterial_desc[i].ctl_state, 						//64,69,74,79,84,89,94,99,104,109,114,119,124,129
 				onramp_out_f[arterial_desc[i].controlling_rm_index-2].agg_occ, 		//65,70,75,80,85,90,95,100,105,110,115,120,125,130
@@ -728,18 +740,16 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 		
 	
 		fprintf(st_file_out, "%d ", global_disable); //1322,1327,1332,1337,1342,1347,1352,1357,1362,1367,1372,1377,1382,1387
-		fprintf(st_file_out, "%d ", ms_diff[i]); //1323,1328,1333,1338,1343,1348,1353,1358,1363,1368,1373,1388
-		fprintf(st_file_out, "%d ", control_period_disable); //1324,1329,1334,1339,1344,1349,1354,1359,1364,1369,1374,1389
+		fprintf(st_file_out, "%d ", ms_diff[i]);     //1323,1328,1333,1338,1343,1348,1353,1358,1363,1368,1373,1378,1383,1388
+		fprintf(st_file_out, "%d ", control_period_disable); //1324,1329,1334,1339,1344,1349,1354,1359,1364,1369,1374,1379,1384,1389
 		fprintf(st_file_out, "%#hhx ", arterial_controllers[i].preemption); //1325,1330,1335,1340,1345,1350,1355,1360,1365,1370,1375,1380,1385,1390
-		fprintf(st_file_out, "%#hhx ", (arterial_controllers[i].preemption & 0x0f)); //1326,1330,1336,1341,1346,1351,1356,1361,1366,1371,1376,1381,1386,1391
+		fprintf(st_file_out, "%#hhx ", (arterial_controllers[i].preemption & 0x0f)); //1326,1331,1336,1341,1346,1351,1356,1361,1366,1371,1376,1381,1386,1391
+	
 
 		}
 
-		for (i = 0; i < NUM_RAMP_CONTROLLERS; i++) //starts at 1386
-			fprintf(st_file_out, "%d ", ramp_meter_desc[arterial_desc[i].controlling_rm_index].inter_threshold_flag);
-				
-			fprintf(st_file_out,"\n");
-		fflush(st_file_out);
+		for (i = 0; i < NUM_RAMP_CONTROLLERS; i++) //starts at 1392
+			fprintf(st_file_out, "%d ", (ramp_meter_desc[arterial_desc[i].controlling_rm_index].inter_threshold_flag));
 
 		
 		/*************************************************
@@ -752,7 +762,7 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 		update_q_R();
 		opt_metering();
 		
-		fprintf(cal_opt_f,"%lf ", time);   // Output calculated Opt RM rt
+		//fprintf(cal_opt_f,"%lf ", time);   // Output calculated Opt RM rt
 		for (i=0;i<NumOnRamp;i++)
 		{				
 			total_rt[i]=opt_r[i][0];							
@@ -806,6 +816,12 @@ for (k=0;k<NumOnRamp;k++)
 				ln_CRM_rt[k][0]=0.8*max_Ln_RM_rt[k];
 			if (max_occ_all_dwn[k] < Occ_Cr)
 				ln_CRM_rt[k][0]=max_Ln_RM_rt[k];
+			
+			if (onramp_out_f[k].agg_occ > OnRamp_Occ_Cr)
+				(ln_CRM_rt[k][0])=(ln_CRM_rt[k][0])*(1.0+ 0.5*(onramp_out_f[k].agg_occ - OnRamp_Occ_Cr));
+			if (ln_CRM_rt[k][0]>max_Ln_RM_rt[k])
+				ln_CRM_rt[k][0]=max_Ln_RM_rt[k];
+
 //#endif
 				
 		fprintf(Ln_RM_rt_f,"%10.2f ",ln_CRM_rt[k][0]);			
@@ -849,54 +865,67 @@ for(k=0;k<NumOnRamp;k++)
 //FOR TEST PURPOSES ONLY###############################
 //counter++;
 //FOR TEST PURPOSES ONLY###############################
-		if( (pts->hour >= 15) && (pts->hour < 18) )
-			min_index = 2;
-		else
-			min_index = 0;
 
-		for (i=min_index;i<NumOnRamp;i++)               // Lane-wise RM rate
+		for (l=0;l<NumOnRamp;l++)               // Lane-wise RM rate
 		{
-			urms_ctl[i].lane_1_action = URMS_ACTION_FIXED_RATE;
-			urms_ctl[i].lane_2_action = URMS_ACTION_FIXED_RATE;
-			urms_ctl[i].lane_3_action = URMS_ACTION_FIXED_RATE;
-			urms_ctl[i].lane_4_action = URMS_ACTION_SKIP;
+			urms_ctl[l].lane_1_action = URMS_ACTION_FIXED_RATE;
+			urms_ctl[l].lane_2_action = URMS_ACTION_FIXED_RATE;
+			urms_ctl[l].lane_3_action = URMS_ACTION_FIXED_RATE;
+			urms_ctl[l].lane_4_action = URMS_ACTION_SKIP;
 
-			urms_ctl[i].lane_1_release_rate = ln_CRM_rt[i][0];
-			urms_ctl[i].lane_2_release_rate = ln_CRM_rt[i][0];
-			urms_ctl[i].lane_3_release_rate = ln_CRM_rt[i][0];
-			urms_ctl[i].lane_4_release_rate = ln_CRM_rt[i][0];
-			urms_ctl[i].no_control = 0;
+			urms_ctl[l].lane_1_release_rate = (char)ln_CRM_rt[i][0];
+			urms_ctl[l].lane_2_release_rate = (char)ln_CRM_rt[i][0];
+			urms_ctl[l].lane_3_release_rate = (char)ln_CRM_rt[i][0];
+			urms_ctl[l].lane_4_release_rate = (char)ln_CRM_rt[i][0];
+			urms_ctl[l].no_control = 0;
 //FOR TEST PURPOSES ONLY###############################
-//				urms_ctl[i].lane_1_release_rate = 450+i;
-//				urms_ctl[i].lane_2_release_rate = 400+i;
-//				urms_ctl[i].lane_3_release_rate = 350+i;
-//				urms_ctl[i].lane_4_release_rate = 300+i;
-//				urms_ctl[i].lane_1_action = URMS_ACTION_SKIP;
-//				urms_ctl[i].lane_2_action = URMS_ACTION_SKIP;
-//				urms_ctl[i].lane_3_action = URMS_ACTION_SKIP;
-//				urms_ctl[i].lane_4_action = URMS_ACTION_SKIP;
-//				urms_ctl[i].lane_1_plan = 1;
-//				urms_ctl[i].lane_2_plan = 1;
-//				urms_ctl[i].lane_3_plan = 1;
-//				urms_ctl[i].lane_4_plan = 1;
-printf("Controller db var %d lane 1 rate %d action %d plan %d lane 2 rate %d action %d plan %d lane 3 rate %d action %d plan %d lane 4 rate %d action %d plan %d\n",
-	metering_controller_db_vars[i],
-	urms_ctl[i].lane_1_release_rate,
-	urms_ctl[i].lane_1_action,
-	urms_ctl[i].lane_1_plan,
-	urms_ctl[i].lane_2_release_rate,
-	urms_ctl[i].lane_2_action,
-	urms_ctl[i].lane_2_plan,
-	urms_ctl[i].lane_3_release_rate,
-	urms_ctl[i].lane_3_action,
-	urms_ctl[i].lane_3_plan,
-	urms_ctl[i].lane_4_release_rate,
-	urms_ctl[i].lane_4_action,
-	urms_ctl[i].lane_4_plan
-);
-//			db_clt_write(pclt, metering_controller_db_vars[i], sizeof(db_urms_t), &urms_ctl[i]); 
+//				urms_ctl[l].lane_1_release_rate = 450+i;
+//				urms_ctl[l].lane_2_release_rate = 400+i;
+//				urms_ctl[l].lane_3_release_rate = 350+i;
+//				urms_ctl[l].lane_4_release_rate = 300+i;
+//				urms_ctl[l].lane_1_action = URMS_ACTION_SKIP;
+//				urms_ctl[l].lane_2_action = URMS_ACTION_SKIP;
+//				urms_ctl[l].lane_3_action = URMS_ACTION_SKIP;
+//				urms_ctl[l].lane_4_action = URMS_ACTION_SKIP;
+//				urms_ctl[l].lane_1_plan = 1;
+//				urms_ctl[l].lane_2_plan = 1;
+//				urms_ctl[l].lane_3_plan = 1;
+//				urms_ctl[l].lane_4_plan = 1;
+			db_clt_write(pclt, metering_controller_db_vars[l], sizeof(db_urms_t), &urms_ctl[l]); 
+			printf("Controller db var %d lane 1 rate %d action %d plan %d lane 2 rate %d action %d plan %d lane 3 rate %d action %d plan %d lane 4 rate %d action %d plan %d\n",
+				metering_controller_db_vars[l],
+				urms_ctl[l].lane_1_release_rate,
+				urms_ctl[l].lane_1_action,
+				urms_ctl[l].lane_1_plan,
+				urms_ctl[l].lane_2_release_rate,
+				urms_ctl[l].lane_2_action,
+				urms_ctl[l].lane_2_plan,
+				urms_ctl[l].lane_3_release_rate,
+				urms_ctl[l].lane_3_action,
+				urms_ctl[l].lane_3_plan,
+				urms_ctl[l].lane_4_release_rate,
+				urms_ctl[l].lane_4_action,
+				urms_ctl[l].lane_4_plan
+			);
+			fprintf(st_file_out, " %d %d %d %d %d %d %d %d %d %d %d %d ",
+				urms_ctl[l].lane_1_release_rate,
+				urms_ctl[l].lane_1_action,
+				urms_ctl[l].lane_1_plan,
+				urms_ctl[l].lane_2_release_rate,
+				urms_ctl[l].lane_2_action,
+				urms_ctl[l].lane_2_plan,
+				urms_ctl[l].lane_3_release_rate,
+				urms_ctl[l].lane_3_action,
+				urms_ctl[l].lane_3_plan,
+				urms_ctl[l].lane_4_release_rate,
+				urms_ctl[l].lane_4_action,
+				urms_ctl[l].lane_4_plan
+			);
 //FOR TEST PURPOSES ONLY###############################
-			}
+		}
+				
+		fprintf(st_file_out,"\n");
+		fflush(st_file_out);
 		//cycle_index++;
 		//cycle_index %= NUM_CYCLE_BUFFS;
 	
@@ -942,7 +971,7 @@ int Init()  // A major function; Called by AAPI.cxx: the top function for intial
 	int i; 
 	
 	// Memory set for variables
-	for(i=0;i<SecSize;i++)
+	/*for(i=0;i<SecSize;i++)
 	{
 		u[i]=89.0; 		
 	}
@@ -951,26 +980,45 @@ int Init()  // A major function; Called by AAPI.cxx: the top function for intial
 		v[i]=0.0;
 		q[i]=0.0;
 		o[i]=0.0;
-	}
+	}*/
 
+	memset(u,0,SecSize*(sizeof(float))); 
+	memset(v,0,SecSize*(sizeof(float))); 
+	memset(q,0,SecSize*(sizeof(float))); 
+	memset(o,0,SecSize*(sizeof(float))); 
+	memset(qc,0,SecSize*(sizeof(float)));
+	memset(queue,0,SecSize*(sizeof(float))); 
+	memset(s,0,NumOnRamp*(sizeof(float)));
+	memset(R,0,NumOnRamp*(sizeof(float)));
+	memset(dmd,0,NumOnRamp*(sizeof(float)));
+	memset(Q_o,0,NumOnRamp*(sizeof(float)));
+	memset(Q_min,0,NumOnRamp*(sizeof(float)));
+	memset(ss,0,Np*NumOnRamp*(sizeof(float)));
+	memset(dd,0,Np*NumOnRamp*(sizeof(float)));
+	memset(pre_w,0,NumOnRamp*(sizeof(float)));
+	memset(max_occ_all_dwn,0,NumOnRamp*(sizeof(float)));
+	memset(max_occ_2_dwn,0,NumOnRamp*(sizeof(float)));
+	memset(q_main,0,SecSize*(sizeof(float)));
+	memset(u2,0,SecSize*(sizeof(float))); 
+	memset(pre_rho,0,SecSize*(sizeof(float)));
+	memset(opt_r,0,SecSize*(sizeof(float)));
+	memset(up_rho,0,Np*sizeof(float));
+	memset(dyna_min_r, 0, NumOnRamp*(sizeof(float))); 
+	memset(dyna_max_r, 0, NumOnRamp*(sizeof(float))); 
+	memset(Ramp_rt, 0, NumOnRamp*(sizeof(float))); 
+	memset(RM_occ, 0, NumOnRamp*(sizeof(float))); 
+	memset(ln_CRM_rt, 0, NumOnRamp*max_onramp_ln*(sizeof(float))); 
+	memset(ln_LRRM_rt, 0, NumOnRamp*max_onramp_ln*(sizeof(float))); 
+	memset(release_cycle, 0, NumOnRamp*max_onramp_ln*(sizeof(int))); 
+	memset(total_rt, 0, NumOnRamp*(sizeof(float))); 
+	memset(total_LRRM_rt, 0, NumOnRamp*(sizeof(float))); 
+	memset(detection_s_0,0,SecSize*sizeof(detData));
+	memset(detection_onramp_0,0,NumOnRamp*sizeof(detData));
+	memset(detection_offramp_0,0,NumOnRamp*sizeof(detData));
+	memset(a_w,0,NumOnRamp*sizeof(float));
 	
-	memset(&opt_r,0,sizeof(opt_r));
-	memset(&dd,0,sizeof(dd));
-	memset(&ss,0,sizeof(ss));
-	memset(&pre_w,0,sizeof(pre_w));
-	memset(&pre_rho,0,sizeof(pre_rho));
-	memset(&up_rho,0,sizeof(up_rho));
-	memset(&ln_CRM_rt,0,sizeof(ln_CRM_rt));
-	memset(&dmd,0,sizeof(dmd));
-	memset(&s,0,sizeof(s));
-	memset(&qc,0,sizeof(qc));
-	memset(&q_main,0,sizeof(q_main));
-	memset(&Q_o,0,sizeof(Q_o));
-	memset(&Q_min,0,sizeof(Q_min));
-	memset(&(detection_s_0[0]),0,sizeof(detection_s_0[SecSize]));
-	memset(&(detection_onramp_0[0]),0,sizeof(detection_onramp_0[NumOnRamp]));
-	memset(&(detection_offramp_0[0]),0,sizeof(detection_offramp_0[NumOnRamp]));
-	memset(&a_w,0,sizeof(a_w));
+	
+	 
 	
 	for(i=0; i<SecSize;i++)
 		detection_s[i] = &(detection_s_0[i]);	
