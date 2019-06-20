@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 		float temp_mean_speed = 0.0;
 
 	short metering_controller_db_vars[] = {
-		3002,	//Capitol Expy
+//		3002,	//Capitol Expressway NOT A CONTROLLED METER!!!!!
 		3202,	//Alum Rock Loop
 		3402,	//Alum Rock Diag
 		3602,	//McKee Diag
@@ -873,10 +873,10 @@ for(k=0;k<NumOnRamp;k++)
 			urms_ctl[l].lane_3_action = URMS_ACTION_FIXED_RATE;
 			urms_ctl[l].lane_4_action = URMS_ACTION_SKIP;
 
-			urms_ctl[l].lane_1_release_rate = (char)ln_CRM_rt[i][0];
-			urms_ctl[l].lane_2_release_rate = (char)ln_CRM_rt[i][0];
-			urms_ctl[l].lane_3_release_rate = (char)ln_CRM_rt[i][0];
-			urms_ctl[l].lane_4_release_rate = (char)ln_CRM_rt[i][0];
+			urms_ctl[l].lane_1_release_rate = (unsigned int)ln_CRM_rt[l][0];
+			urms_ctl[l].lane_2_release_rate = (unsigned int)ln_CRM_rt[l][0];
+			urms_ctl[l].lane_3_release_rate = (unsigned int)ln_CRM_rt[l][0];
+			urms_ctl[l].lane_4_release_rate = (unsigned int)ln_CRM_rt[l][0];
 			urms_ctl[l].no_control = 0;
 //FOR TEST PURPOSES ONLY###############################
 //				urms_ctl[l].lane_1_release_rate = 450+i;
@@ -907,22 +907,26 @@ for(k=0;k<NumOnRamp;k++)
 				urms_ctl[l].lane_4_action,
 				urms_ctl[l].lane_4_plan
 			);
-			fprintf(st_file_out, " %d %d %d %d %d %d %d %d %d %d %d %d ",
-				urms_ctl[l].lane_1_release_rate,
-				urms_ctl[l].lane_1_action,
-				urms_ctl[l].lane_1_plan,
-				urms_ctl[l].lane_2_release_rate,
-				urms_ctl[l].lane_2_action,
-				urms_ctl[l].lane_2_plan,
-				urms_ctl[l].lane_3_release_rate,
-				urms_ctl[l].lane_3_action,
-				urms_ctl[l].lane_3_plan,
-				urms_ctl[l].lane_4_release_rate,
-				urms_ctl[l].lane_4_action,
-				urms_ctl[l].lane_4_plan
+			fprintf(st_file_out, " %u %d %d %u %d %d %u %d %d %u %d %d ",
+				urms_ctl[l].lane_1_release_rate,//1397
+				urms_ctl[l].lane_1_action, 	//1398
+				urms_ctl[l].lane_1_plan, 	//1399
+				urms_ctl[l].lane_2_release_rate,//1400
+				urms_ctl[l].lane_2_action,	//1401
+				urms_ctl[l].lane_2_plan,	//1402
+				urms_ctl[l].lane_3_release_rate,//1403
+				urms_ctl[l].lane_3_action,	//1404
+				urms_ctl[l].lane_3_plan,	//1405
+				urms_ctl[l].lane_4_release_rate,//1406
+				urms_ctl[l].lane_4_action,	//1407
+				urms_ctl[l].lane_4_plan		//1408
 			);
 //FOR TEST PURPOSES ONLY###############################
 		}
+		for (l=0;l<NumOnRamp;l++)               // Lane-wise RM rate
+			fprintf(st_file_out, " %f ",
+			ln_CRM_rt[l][0]
+			);
 				
 		fprintf(st_file_out,"\n");
 		fflush(st_file_out);
