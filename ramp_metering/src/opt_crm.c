@@ -907,8 +907,8 @@ for(k=0;k<NumOnRamp;k++)
 				urms_ctl[l].lane_4_action,
 				urms_ctl[l].lane_4_plan
 			);
-			fprintf(st_file_out, " %u %d %d %u %d %d %u %d %d %u %d %d ",
-				urms_ctl[l].lane_1_release_rate,//1397
+			fprintf(st_file_out, " %d %d %d %d %d %d %d %d %d %d %d %d ",
+				urms_ctl[l].lane_1_release_rate,
 				urms_ctl[l].lane_1_action, 	//1398
 				urms_ctl[l].lane_1_plan, 	//1399
 				urms_ctl[l].lane_2_release_rate,//1400
