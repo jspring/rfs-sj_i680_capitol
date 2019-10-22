@@ -421,7 +421,7 @@ printf("controller_data2[%d].queue_stat[0][1].occ_msb %hhu controller_data2[%d].
 // controller index for each mainline section
 #undef ORIGINAL_IMPL
 #ifdef ORIGINAL_IMPL
-int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1 
+const int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1 
                              {1,   2, -1, -1}, // controller in section 2 
                              {3,  -1, -1, -1}, // controller in section 3
                              {4,  -1, -1, -1}, // controller in section 4
@@ -429,12 +429,18 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 			};
 #endif
 
-			int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1 
+			const int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1       // upstream station is down on 7/15; resumed 8/8/19
                              {0,   1, -1, -1}, // controller in section 2 
                              {1,  2, -1, -1}, // controller in section 3
                              {2,  3, -1, -1}, // controller in section 4
                              {3,  4, -1, -1}, // controller in section 5                             
 			};
+			/*const int secCTidx [SecSize][4] =  {{1, -1, -1, -1}, // controller in section 1 
+                             {1,   -1, -1, -1}, // controller in section 2 
+                             {1,  2, -1, -1}, // controller in section 3
+                             {2,  3, -1, -1}, // controller in section 4
+                             {3,  4, -1, -1}, // controller in section 5                             
+			};*/
 
 
 	
@@ -453,8 +459,8 @@ int secCTidx [SecSize][4] =  {{0, -1, -1, -1}, // controller in section 1
 			}
 		}
 		mainline_out[cycle_index][i].agg_vol = Mind(12000.0, Maxd(temp_vol/temp_num_ct,1));
-		//mainline_out[cycle_index][i].agg_speed = Mind(100.0, Maxd(temp_speed/temp_num_ct,1));
-		mainline_out[cycle_index][i].agg_speed = controller_mainline_data[i].agg_speed;					// xylu: 6/15/19,  Bypassed using current step data
+		mainline_out[cycle_index][i].agg_speed = Mind(75.0, Maxd(temp_speed/temp_num_ct,1));
+		//mainline_out[cycle_index][i].agg_speed = controller_mainline_data[i].agg_speed;					// xylu: 6/15/19,  Bypassed using current step data
 		mainline_out[cycle_index][i].agg_occ =  Mind(90.0, Maxd(temp_occ/temp_num_ct,1));
 		mainline_out[cycle_index][i].agg_density = Mind(250.0, Maxd(temp_density/temp_num_ct,1));
 
@@ -817,10 +823,10 @@ for (k=0;k<NumOnRamp;k++)
 			if (max_occ_all_dwn[k] < Occ_Cr)
 				ln_CRM_rt[k][0]=max_Ln_RM_rt[k];
 			
-			if (onramp_out_f[k].agg_occ > OnRamp_Occ_Cr)
-				(ln_CRM_rt[k][0])=(ln_CRM_rt[k][0])*(1.0+ 0.5*(onramp_out_f[k].agg_occ - OnRamp_Occ_Cr));
+			/*if (onramp_out_f[k].agg_occ > OnRamp_Occ_Cr)
+				(ln_CRM_rt[k][0])=(ln_CRM_rt[k][0])*(1.0+ 0.25*(onramp_out_f[k].agg_occ - OnRamp_Occ_Cr)/(100.0-OnRamp_Occ_Cr));
 			if (ln_CRM_rt[k][0]>max_Ln_RM_rt[k])
-				ln_CRM_rt[k][0]=max_Ln_RM_rt[k];
+				ln_CRM_rt[k][0]=max_Ln_RM_rt[k]; */                // deactivated on 7/15/2019
 
 //#endif
 				
@@ -908,23 +914,23 @@ for(k=0;k<NumOnRamp;k++)
 				urms_ctl[l].lane_4_plan
 			);
 			fprintf(st_file_out, " %d %d %d %d %d %d %d %d %d %d %d %d ",
-				urms_ctl[l].lane_1_release_rate,
-				urms_ctl[l].lane_1_action, 	//1398
-				urms_ctl[l].lane_1_plan, 	//1399
-				urms_ctl[l].lane_2_release_rate,//1400
-				urms_ctl[l].lane_2_action,	//1401
-				urms_ctl[l].lane_2_plan,	//1402
-				urms_ctl[l].lane_3_release_rate,//1403
-				urms_ctl[l].lane_3_action,	//1404
-				urms_ctl[l].lane_3_plan,	//1405
-				urms_ctl[l].lane_4_release_rate,//1406
-				urms_ctl[l].lane_4_action,	//1407
-				urms_ctl[l].lane_4_plan		//1408
+				urms_ctl[l].lane_1_release_rate,//1397,1409,1421,1433
+				urms_ctl[l].lane_1_action, 	//1398,1410,1422,1434
+				urms_ctl[l].lane_1_plan, 	//1399,1410,1423,1435
+				urms_ctl[l].lane_2_release_rate,//1400,1412,1424,1436
+				urms_ctl[l].lane_2_action,	//1401,1413,1425,1437
+				urms_ctl[l].lane_2_plan,	//1402,1414,1426,1438
+				urms_ctl[l].lane_3_release_rate,//1403,1415,1427,1439
+				urms_ctl[l].lane_3_action,	//1404,1416,1428,1440
+				urms_ctl[l].lane_3_plan,	//1405,1417,1429,1441
+				urms_ctl[l].lane_4_release_rate,//1406,1418,1430,1442
+				urms_ctl[l].lane_4_action,	//1407,1419,1431,1443
+				urms_ctl[l].lane_4_plan		//1408,1420,1432,1444
 			);
 //FOR TEST PURPOSES ONLY###############################
 		}
 		for (l=0;l<NumOnRamp;l++)               // Lane-wise RM rate
-			fprintf(st_file_out, " %f ",
+			fprintf(st_file_out, " %f ", //1445,1446,1447,1448
 			ln_CRM_rt[l][0]
 			);
 				
